@@ -10,6 +10,24 @@ import {
 import { type Location, getCategoryMeta } from '@/types'
 import LocationCard from './LocationCard'
 
+// Moves the map to the user's real location on mount
+function GeolocationHandler() {
+  const map = useMap()
+
+  useEffect(() => {
+    if (!map || !navigator.geolocation) return
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        map.setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+        map.setZoom(13)
+      },
+      () => {} // silently stay on default
+    )
+  }, [map])
+
+  return null
+}
+
 interface MapProps {
   locations: Location[]
   currentUserId: string | null
@@ -62,15 +80,6 @@ function PanToMarker({ position }: { position: google.maps.LatLngLiteral | null 
 
 export default function MapComponent({ locations, currentUserId, onDeleteLocation }: MapProps) {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
-  const [center, setCenter] = useState<google.maps.LatLngLiteral>({ lat: 37.7749, lng: -122.4194 })
-
-  useEffect(() => {
-    if (!navigator.geolocation) return
-    navigator.geolocation.getCurrentPosition(
-      (pos) => setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => {} // silently fall back to SF
-    )
-  }, [])
 
   const handleMarkerClick = useCallback((location: Location) => {
     setSelectedLocation(location)
@@ -94,7 +103,7 @@ export default function MapComponent({ locations, currentUserId, onDeleteLocatio
         position={selectedLocation ? { lat: selectedLocation.lat, lng: selectedLocation.lng } : null}
       />
       <GoogleMap
-        defaultCenter={center}
+        defaultCenter={{ lat: 37.7749, lng: -122.4194 }}
         defaultZoom={12}
         mapId="we-should-go-map"
         gestureHandling="greedy"
@@ -103,6 +112,7 @@ export default function MapComponent({ locations, currentUserId, onDeleteLocatio
         onClick={handleClose}
         mapTypeControlOptions={{ position: 0 }}
       >
+        <GeolocationHandler />
         {locations.map((loc) => (
           <AdvancedMarker
             key={loc.id}
