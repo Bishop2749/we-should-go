@@ -7,7 +7,17 @@ import type { User } from '@supabase/supabase-js'
 import { type Location, type Category } from '@/types'
 import MapComponent from '@/components/Map'
 import AddLocationModal from '@/components/AddLocationModal'
+import SearchBar from '@/components/SearchBar'
 import { useRouter } from 'next/navigation'
+
+interface PlaceResult {
+  name: string
+  address: string
+  lat: number
+  lng: number
+  placeId: string
+  googleMapsUrl: string
+}
 
 export default function MapPage() {
   const router = useRouter()
@@ -16,6 +26,12 @@ export default function MapPage() {
   const [user, setUser] = useState<User | null>(null)
   const [locations, setLocations] = useState<Location[]>([])
   const [showAddModal, setShowAddModal] = useState(false)
+  const [pendingPlace, setPendingPlace] = useState<PlaceResult | null>(null)
+
+  const handlePlaceSelected = useCallback((place: PlaceResult) => {
+    setPendingPlace(place)
+    setShowAddModal(true)
+  }, [])
   const [loading, setLoading] = useState(true)
 
   // Load user + locations on mount
@@ -117,40 +133,33 @@ export default function MapPage() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="flex-shrink-0 h-14 bg-white border-b border-gray-100 shadow-sm flex items-center justify-between px-4 z-20">
-        <div className="flex items-center gap-2">
+      <header className="flex-shrink-0 h-14 bg-white border-b border-gray-100 shadow-sm flex items-center gap-3 px-4 z-20">
+        {/* Logo */}
+        <div className="flex items-center gap-1.5 flex-shrink-0">
           <span className="text-xl">📍</span>
-          <h1 className="font-bold text-gray-900 text-base tracking-tight">We Should Go</h1>
-          {locations.length > 0 && (
-            <span className="ml-1 px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full">
-              {locations.length}
-            </span>
-          )}
+          <h1 className="font-bold text-gray-900 text-base tracking-tight hidden sm:block">We Should Go</h1>
         </div>
 
-        <div className="flex items-center gap-3">
-          {/* User avatar */}
-          <div className="flex items-center gap-2">
-            {avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={avatarUrl}
-                alt={userName}
-                className="w-8 h-8 rounded-full object-cover border border-gray-200"
-              />
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs font-bold">
-                {userName.charAt(0).toUpperCase()}
-              </div>
-            )}
-            <span className="hidden sm:block text-sm text-gray-600 max-w-[120px] truncate">
-              {userName}
-            </span>
-          </div>
+        {/* Search bar — primary action */}
+        <SearchBar onPlaceSelected={handlePlaceSelected} />
 
+        {/* Right: avatar + sign out */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={avatarUrl}
+              alt={userName}
+              className="w-8 h-8 rounded-full object-cover border border-gray-200"
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+              {userName.charAt(0).toUpperCase()}
+            </div>
+          )}
           <button
             onClick={handleSignOut}
-            className="text-xs text-gray-400 hover:text-gray-600 font-medium transition-colors px-2 py-1 rounded-lg hover:bg-gray-100"
+            className="text-xs text-gray-400 hover:text-gray-600 font-medium transition-colors px-2 py-1 rounded-lg hover:bg-gray-100 hidden sm:block"
           >
             Sign out
           </button>
@@ -168,15 +177,6 @@ export default function MapPage() {
             currentUserId={user?.id ?? null}
             onDeleteLocation={handleDeleteLocation}
           />
-
-          {/* FAB */}
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="absolute bottom-6 right-4 sm:right-6 w-14 h-14 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white rounded-full shadow-lg flex items-center justify-center text-2xl font-light transition-all z-10"
-            aria-label="Add location"
-          >
-            +
-          </button>
 
           {/* Category legend */}
           <div className="absolute bottom-6 left-4 sm:left-6 z-10">
@@ -202,10 +202,11 @@ export default function MapPage() {
           </div>
 
           {/* Add location modal */}
-          {showAddModal && (
+          {showAddModal && pendingPlace && (
             <AddLocationModal
+              place={pendingPlace}
               onAdd={handleAddLocation}
-              onClose={() => setShowAddModal(false)}
+              onClose={() => { setShowAddModal(false); setPendingPlace(null) }}
               userName={userName}
             />
           )}

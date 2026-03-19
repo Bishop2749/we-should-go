@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { useMapsLibrary } from '@vis.gl/react-google-maps'
+import { useState } from 'react'
 import { CATEGORIES, type Category } from '@/types'
 
 interface PlaceResult {
@@ -14,6 +13,7 @@ interface PlaceResult {
 }
 
 interface AddLocationModalProps {
+  place: PlaceResult
   onAdd: (data: {
     name: string
     description: string
@@ -29,69 +29,26 @@ interface AddLocationModalProps {
   userName: string
 }
 
-export default function AddLocationModal({
-  onAdd,
-  onClose,
-  userName,
-}: AddLocationModalProps) {
-  const placesLib = useMapsLibrary('places')
-  const inputRef = useRef<HTMLInputElement>(null)
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null)
-
-  const [selectedPlace, setSelectedPlace] = useState<PlaceResult | null>(null)
+export default function AddLocationModal({ place, onAdd, onClose, userName }: AddLocationModalProps) {
   const [category, setCategory] = useState<Category>('restaurant')
   const [description, setDescription] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Init Places Autocomplete when library loads
-  useEffect(() => {
-    if (!placesLib || !inputRef.current) return
-
-    const ac = new placesLib.Autocomplete(inputRef.current, {
-      fields: ['geometry', 'name', 'formatted_address', 'place_id', 'url'],
-    })
-
-    ac.addListener('place_changed', () => {
-      const place = ac.getPlace()
-      if (!place.geometry?.location) return
-
-      setSelectedPlace({
-        name: place.name ?? '',
-        address: place.formatted_address ?? '',
-        lat: place.geometry.location.lat(),
-        lng: place.geometry.location.lng(),
-        placeId: place.place_id ?? '',
-        googleMapsUrl: place.url ?? '',
-      })
-      setError(null)
-    })
-
-    autocompleteRef.current = ac
-
-    return () => {
-      google.maps.event.clearInstanceListeners(ac)
-    }
-  }, [placesLib])
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedPlace) {
-      setError('Please select a place from the suggestions')
-      return
-    }
     setSaving(true)
     setError(null)
     try {
       await onAdd({
-        name: selectedPlace.name,
+        name: place.name,
         description,
         category,
-        lat: selectedPlace.lat,
-        lng: selectedPlace.lng,
-        place_id: selectedPlace.placeId,
-        address: selectedPlace.address,
-        google_maps_url: selectedPlace.googleMapsUrl,
+        lat: place.lat,
+        lng: place.lng,
+        place_id: place.placeId,
+        address: place.address,
+        google_maps_url: place.googleMapsUrl,
         added_by_name: userName,
       })
     } catch (err) {
@@ -102,13 +59,11 @@ export default function AddLocationModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Sheet */}
       <div className="relative bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden">
         {/* Drag handle (mobile) */}
         <div className="sm:hidden flex justify-center pt-3 pb-1">
@@ -116,39 +71,23 @@ export default function AddLocationModal({
         </div>
 
         <div className="p-5">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-lg font-bold text-gray-900">Add a place</h2>
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 leading-tight">{place.name}</h2>
+              <p className="text-xs text-gray-400 mt-0.5 truncate max-w-[280px]">{place.address}</p>
+            </div>
             <button
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors flex-shrink-0 ml-2"
             >
               ✕
             </button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Place search */}
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                Search for a place
-              </label>
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder="Restaurant, bar, museum…"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent text-sm text-gray-900 placeholder-gray-400"
-                required
-              />
-              {selectedPlace && (
-                <p className="mt-1.5 text-xs text-emerald-600 font-medium flex items-center gap-1">
-                  <span>✓</span> {selectedPlace.address}
-                </p>
-              )}
-            </div>
-
             {/* Category */}
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
                 Category
               </label>
               <div className="grid grid-cols-5 gap-2">
@@ -165,16 +104,14 @@ export default function AddLocationModal({
                       }`}
                     >
                       <span className="text-base">{meta.emoji}</span>
-                      <span className="truncate w-full text-center leading-tight">
-                        {meta.label}
-                      </span>
+                      <span className="truncate w-full text-center leading-tight">{meta.label}</span>
                     </button>
                   )
                 )}
               </div>
             </div>
 
-            {/* Description */}
+            {/* Notes */}
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
                 Notes <span className="font-normal normal-case">(optional)</span>
@@ -188,9 +125,7 @@ export default function AddLocationModal({
               />
             </div>
 
-            {error && (
-              <p className="text-red-500 text-sm">{error}</p>
-            )}
+            {error && <p className="text-red-500 text-sm">{error}</p>}
 
             <div className="flex gap-3 pt-1">
               <button
@@ -202,7 +137,7 @@ export default function AddLocationModal({
               </button>
               <button
                 type="submit"
-                disabled={saving || !selectedPlace}
+                disabled={saving}
                 className="flex-1 py-3 px-4 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm shadow-sm"
               >
                 {saving ? 'Saving…' : 'Add place'}
