@@ -44,16 +44,6 @@ function MapControls() {
     )
   }
 
-  const openStreetView = () => {
-    if (!map) return
-    const sv = map.getStreetView()
-    const center = map.getCenter()
-    if (center) {
-      sv.setPosition(center)
-      sv.setVisible(true)
-    }
-  }
-
   const btnBase = "w-10 flex items-center justify-center text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors select-none"
   const cardStyle = "bg-white rounded-lg overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.3)]"
 
@@ -79,15 +69,6 @@ function MapControls() {
         </button>
       </div>
 
-      {/* Street View pegman */}
-      <div className={cardStyle}>
-        <button onClick={openStreetView} className={`${btnBase} h-10`} aria-label="Street View" title="Street View">
-          <svg viewBox="0 0 24 24" className="w-5 h-5" fill="#F9A825">
-            <circle cx="12" cy="4" r="2.5"/>
-            <path d="M12 7.5c-1.1 0-2 .4-2.7 1L7 11l1.5 1 1.5-2v3.5L8 20h2l1-3.5h2L14 20h2l-2-6.5V10l1.5 2 1.5-1-2.3-2.5c-.7-.6-1.6-1-2.7-1z"/>
-          </svg>
-        </button>
-      </div>
     </div>
   )
 }
@@ -152,6 +133,7 @@ export default function MapComponent({ locations, currentUserId, onDeleteLocatio
         mapId="we-should-go-map"
         gestureHandling="greedy"
         disableDefaultUI={true}
+        streetViewControl={true}
         style={{ width: '100%', height: '100%' }}
         onClick={handleClose}
       >
