@@ -26,7 +26,7 @@ function GeolocationHandler() {
   return null
 }
 
-// Custom map controls: +/- zoom and recenter button
+// Custom map controls matching Google Maps style
 function MapControls() {
   const map = useMap()
 
@@ -44,39 +44,50 @@ function MapControls() {
     )
   }
 
+  const openStreetView = () => {
+    if (!map) return
+    const sv = map.getStreetView()
+    const center = map.getCenter()
+    if (center) {
+      sv.setPosition(center)
+      sv.setVisible(true)
+    }
+  }
+
+  const btnBase = "w-10 flex items-center justify-center text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors select-none"
+  const cardStyle = "bg-white rounded-lg overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.3)]"
+
   return (
-    <div className="absolute right-3 bottom-8 flex flex-col gap-1.5 z-10">
-      {/* Zoom controls */}
-      <div className="flex flex-col bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
-        <button
-          onClick={zoomIn}
-          className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 active:bg-gray-100 transition-colors text-lg font-light border-b border-gray-100"
-          aria-label="Zoom in"
-        >
+    <div className="absolute right-3 bottom-8 flex flex-col items-center gap-2 z-10">
+      {/* Recenter */}
+      <div className={cardStyle}>
+        <button onClick={recenter} className={`${btnBase} h-10`} aria-label="My location">
+          {/* Filled crosshair target — matches Google Maps icon */}
+          <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+            <path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"/>
+          </svg>
+        </button>
+      </div>
+
+      {/* Zoom +/− */}
+      <div className={cardStyle}>
+        <button onClick={zoomIn} className={`${btnBase} h-10 text-xl font-thin border-b border-gray-200`} aria-label="Zoom in">
           +
         </button>
-        <button
-          onClick={zoomOut}
-          className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 active:bg-gray-100 transition-colors text-lg font-light"
-          aria-label="Zoom out"
-        >
+        <button onClick={zoomOut} className={`${btnBase} h-10 text-xl font-thin`} aria-label="Zoom out">
           −
         </button>
       </div>
 
-      {/* Recenter button */}
-      <button
-        onClick={recenter}
-        className="w-10 h-10 bg-white rounded-xl shadow-md border border-gray-200 flex items-center justify-center text-emerald-500 hover:bg-gray-50 active:bg-gray-100 transition-colors"
-        aria-label="Center on my location"
-        title="My location"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-          <circle cx="12" cy="12" r="3" />
-          <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
-          <circle cx="12" cy="12" r="8" strokeOpacity={0.3} />
-        </svg>
-      </button>
+      {/* Street View pegman */}
+      <div className={cardStyle}>
+        <button onClick={openStreetView} className={`${btnBase} h-10`} aria-label="Street View" title="Street View">
+          <svg viewBox="0 0 24 24" className="w-5 h-5" fill="#F9A825">
+            <circle cx="12" cy="4" r="2.5"/>
+            <path d="M12 7.5c-1.1 0-2 .4-2.7 1L7 11l1.5 1 1.5-2v3.5L8 20h2l1-3.5h2L14 20h2l-2-6.5V10l1.5 2 1.5-1-2.3-2.5c-.7-.6-1.6-1-2.7-1z"/>
+          </svg>
+        </button>
+      </div>
     </div>
   )
 }
