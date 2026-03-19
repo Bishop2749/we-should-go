@@ -26,12 +26,9 @@ function GeolocationHandler() {
   return null
 }
 
-// Custom map controls matching Google Maps style
-function MapControls() {
+// Recenter button — only custom control we keep
+function RecenterButton() {
   const map = useMap()
-
-  const zoomIn = () => map?.setZoom((map.getZoom() ?? 12) + 1)
-  const zoomOut = () => map?.setZoom((map.getZoom() ?? 12) - 1)
 
   const recenter = () => {
     if (!navigator.geolocation) return
@@ -44,31 +41,26 @@ function MapControls() {
     )
   }
 
-  const btnBase = "w-10 flex items-center justify-center text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors select-none"
-  const cardStyle = "bg-white rounded-lg overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.3)]"
-
   return (
-    <div className="absolute right-3 bottom-8 flex flex-col items-center gap-2 z-10">
-      {/* Recenter */}
-      <div className={cardStyle}>
-        <button onClick={recenter} className={`${btnBase} h-10`} aria-label="My location">
-          {/* Filled crosshair target — matches Google Maps icon */}
-          <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-            <path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"/>
-          </svg>
-        </button>
-      </div>
-
-      {/* Zoom +/− */}
-      <div className={cardStyle}>
-        <button onClick={zoomIn} className={`${btnBase} h-10 text-xl font-thin border-b border-gray-200`} aria-label="Zoom in">
-          +
-        </button>
-        <button onClick={zoomOut} className={`${btnBase} h-10 text-xl font-thin`} aria-label="Zoom out">
-          −
-        </button>
-      </div>
-
+    <div className="absolute right-[11px] bottom-[172px] z-10">
+      <button
+        onClick={recenter}
+        aria-label="My location"
+        title="My location"
+        style={{
+          width: 40, height: 40,
+          background: 'white',
+          border: 'none',
+          borderRadius: 2,
+          boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
+          cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}
+      >
+        <svg viewBox="0 0 24 24" style={{ width: 20, height: 20 }} fill="#666">
+          <path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"/>
+        </svg>
+      </button>
     </div>
   )
 }
@@ -132,13 +124,18 @@ export default function MapComponent({ locations, currentUserId, onDeleteLocatio
         defaultZoom={12}
         mapId="we-should-go-map"
         gestureHandling="greedy"
-        disableDefaultUI={true}
+        disableDefaultUI={false}
+        zoomControl={true}
         streetViewControl={true}
+        mapTypeControl={false}
+        fullscreenControl={false}
+        rotateControl={false}
+        scaleControl={false}
         style={{ width: '100%', height: '100%' }}
         onClick={handleClose}
       >
         <GeolocationHandler />
-        <MapControls />
+        <RecenterButton />
 
         {locations.map((loc) => (
           <AdvancedMarker
