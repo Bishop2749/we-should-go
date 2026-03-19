@@ -13,7 +13,6 @@ import LocationCard from './LocationCard'
 // Moves the map to the user's real location on mount
 function GeolocationHandler() {
   const map = useMap()
-
   useEffect(() => {
     if (!map || !navigator.geolocation) return
     navigator.geolocation.getCurrentPosition(
@@ -21,11 +20,65 @@ function GeolocationHandler() {
         map.setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude })
         map.setZoom(13)
       },
-      () => {} // silently stay on default
+      () => {}
     )
   }, [map])
-
   return null
+}
+
+// Custom map controls: +/- zoom and recenter button
+function MapControls() {
+  const map = useMap()
+
+  const zoomIn = () => map?.setZoom((map.getZoom() ?? 12) + 1)
+  const zoomOut = () => map?.setZoom((map.getZoom() ?? 12) - 1)
+
+  const recenter = () => {
+    if (!navigator.geolocation) return
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        map?.panTo({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+        map?.setZoom(14)
+      },
+      () => {}
+    )
+  }
+
+  return (
+    <div className="absolute right-3 bottom-8 flex flex-col gap-1.5 z-10">
+      {/* Zoom controls */}
+      <div className="flex flex-col bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+        <button
+          onClick={zoomIn}
+          className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 active:bg-gray-100 transition-colors text-lg font-light border-b border-gray-100"
+          aria-label="Zoom in"
+        >
+          +
+        </button>
+        <button
+          onClick={zoomOut}
+          className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 active:bg-gray-100 transition-colors text-lg font-light"
+          aria-label="Zoom out"
+        >
+          −
+        </button>
+      </div>
+
+      {/* Recenter button */}
+      <button
+        onClick={recenter}
+        className="w-10 h-10 bg-white rounded-xl shadow-md border border-gray-200 flex items-center justify-center text-emerald-500 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+        aria-label="Center on my location"
+        title="My location"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+          <circle cx="12" cy="12" r="3" />
+          <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+          <circle cx="12" cy="12" r="8" strokeOpacity={0.3} />
+        </svg>
+      </button>
+    </div>
+  )
 }
 
 interface MapProps {
@@ -34,7 +87,6 @@ interface MapProps {
   onDeleteLocation: (id: string) => void
 }
 
-// Custom colored pin marker
 function CategoryPin({ category }: { category: string }) {
   const meta = getCategoryMeta(category)
   return (
@@ -53,27 +105,17 @@ function CategoryPin({ category }: { category: string }) {
         cursor: 'pointer',
       }}
     >
-      <span
-        style={{
-          transform: 'rotate(45deg)',
-          display: 'block',
-          fontSize: 16,
-          lineHeight: 1,
-        }}
-      >
+      <span style={{ transform: 'rotate(45deg)', display: 'block', fontSize: 16, lineHeight: 1 }}>
         {meta.emoji}
       </span>
     </div>
   )
 }
 
-// Panning helper (must be inside APIProvider)
 function PanToMarker({ position }: { position: google.maps.LatLngLiteral | null }) {
   const map = useMap()
   if (map && position) {
-    // Pan to marker but offset slightly upward so InfoWindow is visible
-    const offset = { lat: position.lat - 0.002, lng: position.lng }
-    map.panTo(offset)
+    map.panTo({ lat: position.lat - 0.002, lng: position.lng })
   }
   return null
 }
@@ -81,19 +123,10 @@ function PanToMarker({ position }: { position: google.maps.LatLngLiteral | null 
 export default function MapComponent({ locations, currentUserId, onDeleteLocation }: MapProps) {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
 
-  const handleMarkerClick = useCallback((location: Location) => {
-    setSelectedLocation(location)
-  }, [])
-
-  const handleClose = useCallback(() => {
-    setSelectedLocation(null)
-  }, [])
-
+  const handleMarkerClick = useCallback((location: Location) => setSelectedLocation(location), [])
+  const handleClose = useCallback(() => setSelectedLocation(null), [])
   const handleDelete = useCallback(
-    (id: string) => {
-      onDeleteLocation(id)
-      setSelectedLocation(null)
-    },
+    (id: string) => { onDeleteLocation(id); setSelectedLocation(null) },
     [onDeleteLocation]
   )
 
@@ -107,12 +140,13 @@ export default function MapComponent({ locations, currentUserId, onDeleteLocatio
         defaultZoom={12}
         mapId="we-should-go-map"
         gestureHandling="greedy"
-        disableDefaultUI={false}
+        disableDefaultUI={true}
         style={{ width: '100%', height: '100%' }}
         onClick={handleClose}
-        mapTypeControlOptions={{ position: 0 }}
       >
         <GeolocationHandler />
+        <MapControls />
+
         {locations.map((loc) => (
           <AdvancedMarker
             key={loc.id}
