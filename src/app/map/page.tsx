@@ -131,6 +131,10 @@ export default function MapPage() {
   }
 
   return (
+    <APIProvider
+      apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
+      libraries={['places']}
+    >
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
       <header className="flex-shrink-0 h-14 bg-white border-b border-gray-100 shadow-sm flex items-center gap-3 px-4 z-20">
@@ -168,10 +172,6 @@ export default function MapPage() {
 
       {/* Map */}
       <div className="flex-1 relative min-h-0">
-        <APIProvider
-          apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
-          libraries={['places']}
-        >
           <MapComponent
             locations={locations}
             currentUserId={user?.id ?? null}
@@ -210,8 +210,8 @@ export default function MapPage() {
               userName={userName}
             />
           )}
-        </APIProvider>
       </div>
     </div>
+    </APIProvider>
   )
 }
