@@ -26,43 +26,52 @@ function GeolocationHandler() {
   return null
 }
 
-// Recenter button — only custom control we keep
+// Injects recenter button directly into Google's native control layer
 function RecenterButton() {
   const map = useMap()
 
-  const recenter = () => {
-    if (!navigator.geolocation) return
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        map?.panTo({ lat: pos.coords.latitude, lng: pos.coords.longitude })
-        map?.setZoom(14)
-      },
-      () => {}
-    )
-  }
+  useEffect(() => {
+    if (!map) return
 
-  return (
-    <div className="absolute right-[11px] bottom-[172px] z-10">
-      <button
-        onClick={recenter}
-        aria-label="My location"
-        title="My location"
-        style={{
-          width: 40, height: 40,
-          background: 'white',
-          border: 'none',
-          borderRadius: 2,
-          boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
-          cursor: 'pointer',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}
-      >
-        <svg viewBox="0 0 24 24" style={{ width: 20, height: 20 }} fill="#666">
-          <path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"/>
-        </svg>
-      </button>
-    </div>
-  )
+    const btn = document.createElement('button')
+    btn.title = 'My location'
+    btn.setAttribute('aria-label', 'My location')
+    btn.style.cssText = `
+      width:40px; height:40px; background:white; border:none;
+      border-radius:2px; box-shadow:0 1px 4px rgba(0,0,0,0.3);
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      margin-right:10px; margin-bottom:0; padding:0;
+    `
+    btn.innerHTML = `<svg viewBox="0 0 24 24" width="20" height="20" fill="#666">
+      <path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"/>
+    </svg>`
+
+    btn.addEventListener('mouseenter', () => btn.style.background = '#f5f5f5')
+    btn.addEventListener('mouseleave', () => btn.style.background = 'white')
+    btn.addEventListener('click', () => {
+      if (!navigator.geolocation) return
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          map.panTo({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+          map.setZoom(14)
+        },
+        () => {}
+      )
+    })
+
+    // Push into Google's RIGHT_BOTTOM control slot — same layer as pegman/zoom
+    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(btn)
+
+    return () => {
+      // Clean up on unmount
+      const controls = map.controls[google.maps.ControlPosition.RIGHT_BOTTOM]
+      for (let i = 0; i < controls.getLength(); i++) {
+        if (controls.getAt(i) === btn) { controls.removeAt(i); break }
+      }
+    }
+  }, [map])
+
+  return null
 }
 
 interface MapProps {
