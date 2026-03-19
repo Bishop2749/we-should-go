@@ -40,6 +40,13 @@ function MapControls() {
     )
   }
 
+  const openStreetView = () => {
+    if (!map) return
+    const sv = map.getStreetView()
+    const center = map.getCenter()
+    if (center) { sv.setPosition(center); sv.setVisible(true) }
+  }
+
   const card = {
     background: 'white',
     borderRadius: 12,
@@ -102,6 +109,23 @@ function MapControls() {
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
         >
           −
+        </button>
+      </div>
+
+      {/* Street View — custom styled to match */}
+      <div style={card}>
+        <button
+          style={btn}
+          onClick={openStreetView}
+          aria-label="Street View"
+          title="Street View"
+          onMouseEnter={e => (e.currentTarget.style.background = '#f0f0f0')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="#F9A825">
+            <circle cx="12" cy="4.5" r="2.5"/>
+            <path d="M12 8.5c-1.2 0-2.2.5-2.9 1.2L7 12.5l1.8 1.2 1.2-1.7V17L8.5 21h2l1-3h1l1 3h2L14 17v-5l1.2 1.7 1.8-1.2-2.1-2.8c-.7-.7-1.7-1.2-2.9-1.2z" fill="#F9A825"/>
+          </svg>
         </button>
       </div>
     </div>
@@ -168,7 +192,6 @@ export default function MapComponent({ locations, currentUserId, onDeleteLocatio
         mapId="we-should-go-map"
         gestureHandling="greedy"
         disableDefaultUI={true}
-        streetViewControl={true}
         style={{ width: '100%', height: '100%' }}
         onClick={handleClose}
       >
