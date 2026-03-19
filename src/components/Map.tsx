@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import {
   Map as GoogleMap,
   AdvancedMarker,
@@ -62,6 +62,15 @@ function PanToMarker({ position }: { position: google.maps.LatLngLiteral | null 
 
 export default function MapComponent({ locations, currentUserId, onDeleteLocation }: MapProps) {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
+  const [center, setCenter] = useState<google.maps.LatLngLiteral>({ lat: 37.7749, lng: -122.4194 })
+
+  useEffect(() => {
+    if (!navigator.geolocation) return
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => {} // silently fall back to SF
+    )
+  }, [])
 
   const handleMarkerClick = useCallback((location: Location) => {
     setSelectedLocation(location)
@@ -79,15 +88,13 @@ export default function MapComponent({ locations, currentUserId, onDeleteLocatio
     [onDeleteLocation]
   )
 
-  const defaultCenter = { lat: 37.7749, lng: -122.4194 } // SF as default
-
   return (
     <>
       <PanToMarker
         position={selectedLocation ? { lat: selectedLocation.lat, lng: selectedLocation.lng } : null}
       />
       <GoogleMap
-        defaultCenter={defaultCenter}
+        defaultCenter={center}
         defaultZoom={12}
         mapId="we-should-go-map"
         gestureHandling="greedy"
