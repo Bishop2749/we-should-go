@@ -26,52 +26,86 @@ function GeolocationHandler() {
   return null
 }
 
-// Injects recenter button directly into Google's native control layer
-function RecenterButton() {
+// Custom controls — compact, rounded, matching Google Maps mobile style
+function MapControls() {
   const map = useMap()
 
-  useEffect(() => {
-    if (!map) return
+  const zoomIn = () => map?.setZoom((map.getZoom() ?? 12) + 1)
+  const zoomOut = () => map?.setZoom((map.getZoom() ?? 12) - 1)
+  const recenter = () => {
+    if (!navigator.geolocation) return
+    navigator.geolocation.getCurrentPosition(
+      (pos) => { map?.panTo({ lat: pos.coords.latitude, lng: pos.coords.longitude }); map?.setZoom(14) },
+      () => {}
+    )
+  }
 
-    const btn = document.createElement('button')
-    btn.title = 'My location'
-    btn.setAttribute('aria-label', 'My location')
-    btn.style.cssText = `
-      width:40px; height:40px; background:white; border:none;
-      border-radius:2px; box-shadow:0 1px 4px rgba(0,0,0,0.3);
-      cursor:pointer; display:flex; align-items:center; justify-content:center;
-      margin-right:10px; margin-bottom:0; padding:0;
-    `
-    btn.innerHTML = `<svg viewBox="0 0 24 24" width="20" height="20" fill="#666">
-      <path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"/>
-    </svg>`
+  const card = {
+    background: 'white',
+    borderRadius: 12,
+    boxShadow: '0 2px 6px rgba(0,0,0,0.18)',
+    overflow: 'hidden' as const,
+    display: 'flex',
+    flexDirection: 'column' as const,
+  }
 
-    btn.addEventListener('mouseenter', () => btn.style.background = '#f5f5f5')
-    btn.addEventListener('mouseleave', () => btn.style.background = 'white')
-    btn.addEventListener('click', () => {
-      if (!navigator.geolocation) return
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          map.panTo({ lat: pos.coords.latitude, lng: pos.coords.longitude })
-          map.setZoom(14)
-        },
-        () => {}
-      )
-    })
+  const btn = {
+    width: 42, height: 42,
+    border: 'none',
+    background: 'transparent',
+    cursor: 'pointer',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    color: '#444',
+    fontSize: 20,
+    fontWeight: 300,
+    transition: 'background 0.15s',
+  }
 
-    // Push into Google's RIGHT_BOTTOM control slot — same layer as pegman/zoom
-    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(btn)
+  return (
+    <div style={{ position: 'absolute', right: 12, bottom: 80, display: 'flex', flexDirection: 'column', gap: 8, zIndex: 10 }}>
+      {/* Recenter */}
+      <div style={card}>
+        <button
+          style={btn}
+          onClick={recenter}
+          aria-label="My location"
+          onMouseEnter={e => (e.currentTarget.style.background = '#f0f0f0')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#444" strokeWidth="1.8" strokeLinecap="round">
+            <circle cx="12" cy="12" r="3.5" fill="#444" stroke="none"/>
+            <line x1="12" y1="2" x2="12" y2="6"/>
+            <line x1="12" y1="18" x2="12" y2="22"/>
+            <line x1="2" y1="12" x2="6" y2="12"/>
+            <line x1="18" y1="12" x2="22" y2="12"/>
+            <circle cx="12" cy="12" r="7" fill="none"/>
+          </svg>
+        </button>
+      </div>
 
-    return () => {
-      // Clean up on unmount
-      const controls = map.controls[google.maps.ControlPosition.RIGHT_BOTTOM]
-      for (let i = 0; i < controls.getLength(); i++) {
-        if (controls.getAt(i) === btn) { controls.removeAt(i); break }
-      }
-    }
-  }, [map])
-
-  return null
+      {/* Zoom */}
+      <div style={card}>
+        <button
+          style={{ ...btn, borderBottom: '1px solid #e8e8e8' }}
+          onClick={zoomIn}
+          aria-label="Zoom in"
+          onMouseEnter={e => (e.currentTarget.style.background = '#f0f0f0')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+        >
+          +
+        </button>
+        <button
+          style={btn}
+          onClick={zoomOut}
+          aria-label="Zoom out"
+          onMouseEnter={e => (e.currentTarget.style.background = '#f0f0f0')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+        >
+          −
+        </button>
+      </div>
+    </div>
+  )
 }
 
 interface MapProps {
@@ -133,18 +167,13 @@ export default function MapComponent({ locations, currentUserId, onDeleteLocatio
         defaultZoom={12}
         mapId="we-should-go-map"
         gestureHandling="greedy"
-        disableDefaultUI={false}
-        zoomControl={true}
+        disableDefaultUI={true}
         streetViewControl={true}
-        mapTypeControl={false}
-        fullscreenControl={false}
-        rotateControl={false}
-        scaleControl={false}
         style={{ width: '100%', height: '100%' }}
         onClick={handleClose}
       >
         <GeolocationHandler />
-        <RecenterButton />
+        <MapControls />
 
         {locations.map((loc) => (
           <AdvancedMarker
