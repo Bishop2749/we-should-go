@@ -176,6 +176,10 @@ export default function MapPage() {
             locations={locations}
             currentUserId={user?.id ?? null}
             onDeleteLocation={handleDeleteLocation}
+            onAddFromPoi={(place) => {
+              setPendingPlace({ ...place, placeId: place.placeId })
+              setShowAddModal(true)
+            }}
           />
 
           {/* Category legend */}

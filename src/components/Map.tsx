@@ -8,6 +8,7 @@ import {
 } from '@vis.gl/react-google-maps'
 import { type Location, getCategoryMeta } from '@/types'
 import LocationCard from './LocationCard'
+import PoiCard from './PoiCard'
 
 // Moves the map to the user's real location on mount
 function GeolocationHandler() {
@@ -108,10 +109,13 @@ function MapControls() {
   )
 }
 
+interface PoiClick { placeId: string; lat: number; lng: number }
+
 interface MapProps {
   locations: Location[]
   currentUserId: string | null
   onDeleteLocation: (id: string) => void
+  onAddFromPoi: (place: { name: string; address: string; lat: number; lng: number; placeId: string; googleMapsUrl: string }) => void
 }
 
 function CategoryPin({ category }: { category: string }) {
@@ -147,15 +151,35 @@ function PanToMarker({ position }: { position: google.maps.LatLngLiteral | null 
   return null
 }
 
-export default function MapComponent({ locations, currentUserId, onDeleteLocation }: MapProps) {
+export default function MapComponent({ locations, currentUserId, onDeleteLocation, onAddFromPoi }: MapProps) {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
+  const [selectedPoi, setSelectedPoi] = useState<PoiClick | null>(null)
 
-  const handleMarkerClick = useCallback((location: Location) => setSelectedLocation(location), [])
-  const handleClose = useCallback(() => setSelectedLocation(null), [])
+  const handleMarkerClick = useCallback((location: Location) => {
+    setSelectedPoi(null)
+    setSelectedLocation(location)
+  }, [])
+
+  const handleClose = useCallback(() => {
+    setSelectedLocation(null)
+    setSelectedPoi(null)
+  }, [])
+
   const handleDelete = useCallback(
     (id: string) => { onDeleteLocation(id); setSelectedLocation(null) },
     [onDeleteLocation]
   )
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleMapClick = useCallback((e: any) => {
+    if (e.detail?.placeId) {
+      e.stop?.()
+      setSelectedLocation(null)
+      setSelectedPoi({ placeId: e.detail.placeId, lat: e.detail.latLng?.lat ?? 0, lng: e.detail.latLng?.lng ?? 0 })
+    } else {
+      handleClose()
+    }
+  }, [handleClose])
 
   return (
     <>
@@ -169,7 +193,7 @@ export default function MapComponent({ locations, currentUserId, onDeleteLocatio
         gestureHandling="greedy"
         disableDefaultUI={true}
         style={{ width: '100%', height: '100%' }}
-        onClick={handleClose}
+        onClick={handleMapClick}
       >
         <GeolocationHandler />
         <MapControls />
@@ -187,13 +211,25 @@ export default function MapComponent({ locations, currentUserId, onDeleteLocatio
 
       </GoogleMap>
 
-      {/* Location card rendered outside map — full design control */}
+      {/* Saved location card */}
       {selectedLocation && (
         <LocationCard
           location={selectedLocation}
           currentUserId={currentUserId}
           onClose={handleClose}
           onDelete={handleDelete}
+        />
+      )}
+
+      {/* POI tap card — intercepts Google's native InfoWindow */}
+      {selectedPoi && (
+        <PoiCard
+          placeId={selectedPoi.placeId}
+          lat={selectedPoi.lat}
+          lng={selectedPoi.lng}
+          onClose={handleClose}
+          onAdd={(place) => { onAddFromPoi(place); handleClose() }}
+          alreadySaved={locations.some(l => l.place_id === selectedPoi.placeId)}
         />
       )}
     </>
