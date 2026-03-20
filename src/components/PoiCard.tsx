@@ -18,10 +18,11 @@ interface PoiCardProps {
   lng: number
   onClose: () => void
   onAdd: (place: PoiInfo) => void
+  onCreateEvent?: (place: PoiInfo) => void
   alreadySaved: boolean
 }
 
-export default function PoiCard({ placeId, lat, lng, onClose, onAdd, alreadySaved }: PoiCardProps) {
+export default function PoiCard({ placeId, lat, lng, onClose, onAdd, onCreateEvent, alreadySaved }: PoiCardProps) {
   const placesLib = useMapsLibrary('places')
   const [info, setInfo] = useState<PoiInfo | null>(null)
   const [loading, setLoading] = useState(true)
@@ -101,6 +102,17 @@ export default function PoiCard({ placeId, lat, lng, onClose, onAdd, alreadySave
                         <path d="M12 5v14M5 12h14"/>
                       </svg>
                       Add to We Should Go
+                    </button>
+                  )}
+
+                  {/* Create Event at this location */}
+                  {onCreateEvent && (
+                    <button
+                      onClick={() => info && onCreateEvent(info)}
+                      className="flex items-center justify-center gap-1.5 py-3 px-4 rounded-2xl bg-indigo-50 text-indigo-600 font-semibold text-sm hover:bg-indigo-100 transition-colors"
+                      title="Create event here"
+                    >
+                      📅
                     </button>
                   )}
 

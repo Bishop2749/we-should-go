@@ -5,11 +5,15 @@ import { APIProvider } from '@vis.gl/react-google-maps'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import { type Location, type Category } from '@/types'
+import type { Event, EventAttendee } from '@/types/events'
 import MapComponent from '@/components/Map'
 import AddLocationModal from '@/components/AddLocationModal'
 import SearchBar from '@/components/SearchBar'
 import InviteModal from '@/components/InviteModal'
+import CreateEventModal from '@/components/CreateEventModal'
+import ProfileModal from '@/components/ProfileModal'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 interface PlaceResult {
   name: string
@@ -20,23 +24,32 @@ interface PlaceResult {
   googleMapsUrl: string
 }
 
+interface EventWithMeta extends Event {
+  myStatus?: EventAttendee['status']
+  attendeeCount?: number
+}
+
 export default function MapPage() {
   const router = useRouter()
   const supabase = createClient()
 
   const [user, setUser] = useState<User | null>(null)
   const [locations, setLocations] = useState<Location[]>([])
+  const [events, setEvents] = useState<EventWithMeta[]>([])
   const [showAddModal, setShowAddModal] = useState(false)
   const [showInviteModal, setShowInviteModal] = useState(false)
+  const [showCreateEventModal, setShowCreateEventModal] = useState(false)
+  const [showProfileModal, setShowProfileModal] = useState(false)
   const [pendingPlace, setPendingPlace] = useState<PlaceResult | null>(null)
+  const [pendingEventPlace, setPendingEventPlace] = useState<PlaceResult | null>(null)
+  const [loading, setLoading] = useState(true)
 
   const handlePlaceSelected = useCallback((place: PlaceResult) => {
     setPendingPlace(place)
     setShowAddModal(true)
   }, [])
-  const [loading, setLoading] = useState(true)
 
-  // Load user + locations on mount
+  // Load user + locations + events on mount
   useEffect(() => {
     async function init() {
       const {
@@ -50,13 +63,54 @@ export default function MapPage() {
 
       setUser(user)
 
-      const { data, error } = await supabase
+      // Load locations
+      const { data: locationData, error: locationError } = await supabase
         .from('locations')
         .select('*')
         .order('created_at', { ascending: false })
 
-      if (!error && data) {
-        setLocations(data as Location[])
+      if (!locationError && locationData) {
+        setLocations(locationData as Location[])
+      }
+
+      // Load events (public + mine + invited)
+      const { data: eventData } = await supabase
+        .from('events')
+        .select('*')
+        .order('starts_at', { ascending: true })
+
+      if (eventData) {
+        const evts = eventData as Event[]
+
+        // Get my attendee records for status
+        const { data: myAttendees } = await supabase
+          .from('event_attendees')
+          .select('event_id, status')
+          .eq('user_id', user.id)
+
+        const statusMap: Record<string, EventAttendee['status']> = {}
+        for (const a of (myAttendees ?? []) as { event_id: string; status: EventAttendee['status'] }[]) {
+          statusMap[a.event_id] = a.status
+        }
+
+        // Get attendee counts
+        const countMap: Record<string, number> = {}
+        if (evts.length > 0) {
+          const { data: countData } = await supabase
+            .from('event_attendees')
+            .select('event_id')
+            .in('event_id', evts.map(e => e.id))
+            .eq('status', 'accepted')
+          for (const row of (countData ?? []) as { event_id: string }[]) {
+            countMap[row.event_id] = (countMap[row.event_id] ?? 0) + 1
+          }
+        }
+
+        setEvents(evts.map(e => ({
+          ...e,
+          myStatus: statusMap[e.id],
+          attendeeCount: countMap[e.id] ?? 0,
+        })))
       }
 
       setLoading(false)
@@ -107,6 +161,46 @@ export default function MapPage() {
     [supabase]
   )
 
+  const handleEventCreated = useCallback((eventId: string) => {
+    // Reload events after creation
+    async function reload() {
+      const { data: eventData } = await supabase
+        .from('events')
+        .select('*')
+        .order('starts_at', { ascending: true })
+      if (eventData) {
+        const evts = eventData as Event[]
+        if (!user) return
+        const { data: myAttendees } = await supabase
+          .from('event_attendees')
+          .select('event_id, status')
+          .eq('user_id', user.id)
+        const statusMap: Record<string, EventAttendee['status']> = {}
+        for (const a of (myAttendees ?? []) as { event_id: string; status: EventAttendee['status'] }[]) {
+          statusMap[a.event_id] = a.status
+        }
+        const countMap: Record<string, number> = {}
+        if (evts.length > 0) {
+          const { data: countData } = await supabase
+            .from('event_attendees')
+            .select('event_id')
+            .in('event_id', evts.map(e => e.id))
+            .eq('status', 'accepted')
+          for (const row of (countData ?? []) as { event_id: string }[]) {
+            countMap[row.event_id] = (countMap[row.event_id] ?? 0) + 1
+          }
+        }
+        setEvents(evts.map(e => ({
+          ...e,
+          myStatus: statusMap[e.id],
+          attendeeCount: countMap[e.id] ?? 0,
+        })))
+      }
+    }
+    reload()
+    void eventId // will navigate on click in EventCard
+  }, [user, supabase])
+
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     router.push('/login')
@@ -149,13 +243,37 @@ export default function MapPage() {
         {/* Search bar — primary action */}
         <SearchBar onPlaceSelected={handlePlaceSelected} />
 
-        {/* Right: invite + avatar + sign out */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+        {/* Right: calendar + invite + create event + avatar */}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          {/* Calendar */}
+          <Link
+            href="/calendar"
+            title="My Calendar"
+            className="flex items-center gap-1 text-xs text-gray-500 hover:text-indigo-600 font-medium transition-colors px-2 py-1.5 rounded-lg hover:bg-indigo-50"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <span className="hidden sm:block">Calendar</span>
+          </Link>
+
+          {/* Create Event */}
+          <button
+            onClick={() => { setPendingEventPlace(null); setShowCreateEventModal(true) }}
+            title="Create an event"
+            className="flex items-center gap-1 text-xs text-gray-500 hover:text-indigo-600 font-medium transition-colors px-2 py-1.5 rounded-lg hover:bg-indigo-50"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="20"/><line x1="9" y1="17" x2="15" y2="17"/>
+            </svg>
+            <span className="hidden sm:block">Event</span>
+          </button>
+
           {/* Invite a friend button */}
           <button
             onClick={() => setShowInviteModal(true)}
             title="Invite a friend"
-            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-emerald-600 font-medium transition-colors px-2 py-1.5 rounded-lg hover:bg-emerald-50"
+            className="flex items-center gap-1 text-xs text-gray-500 hover:text-emerald-600 font-medium transition-colors px-2 py-1.5 rounded-lg hover:bg-emerald-50"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -176,18 +294,26 @@ export default function MapPage() {
             <span className="hidden sm:block">Invite</span>
           </button>
 
-          {avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={avatarUrl}
-              alt={userName}
-              className="w-8 h-8 rounded-full object-cover border border-gray-200"
-            />
-          ) : (
-            <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-              {userName.charAt(0).toUpperCase()}
-            </div>
-          )}
+          {/* Avatar / Profile */}
+          <button
+            onClick={() => setShowProfileModal(true)}
+            title="Edit profile"
+            className="flex items-center"
+          >
+            {avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={avatarUrl}
+                alt={userName}
+                className="w-8 h-8 rounded-full object-cover border border-gray-200 hover:border-indigo-300 transition-colors"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 hover:bg-emerald-600 transition-colors">
+                {userName.charAt(0).toUpperCase()}
+              </div>
+            )}
+          </button>
+
           <button
             onClick={handleSignOut}
             className="text-xs text-gray-400 hover:text-gray-600 font-medium transition-colors px-2 py-1 rounded-lg hover:bg-gray-100 hidden sm:block"
@@ -201,11 +327,16 @@ export default function MapPage() {
       <div className="flex-1 relative min-h-0">
           <MapComponent
             locations={locations}
+            events={events}
             currentUserId={user?.id ?? null}
             onDeleteLocation={handleDeleteLocation}
             onAddFromPoi={(place) => {
               setPendingPlace({ ...place, placeId: place.placeId })
               setShowAddModal(true)
+            }}
+            onCreateEventFromPoi={(place) => {
+              setPendingEventPlace(place)
+              setShowCreateEventModal(true)
             }}
           />
 
@@ -217,8 +348,9 @@ export default function MapPage() {
                   { emoji: '🍽️', label: 'Restaurant', color: '#ef4444' },
                   { emoji: '🍺', label: 'Bar', color: '#f59e0b' },
                   { emoji: '🎯', label: 'Activity', color: '#3b82f6' },
-                  { emoji: '🎉', label: 'Event', color: '#a855f7' },
+                  { emoji: '🎉', label: 'Saved Event', color: '#a855f7' },
                   { emoji: '📍', label: 'Other', color: '#6b7280' },
+                  { emoji: '📅', label: 'Event Pin', color: '#6366f1' },
                 ].map(({ emoji, label, color }) => (
                   <div key={label} className="flex items-center gap-1.5">
                     <div
@@ -242,9 +374,27 @@ export default function MapPage() {
             />
           )}
 
+          {/* Create Event modal */}
+          {showCreateEventModal && user && (
+            <CreateEventModal
+              user={user}
+              preset={pendingEventPlace}
+              onClose={() => { setShowCreateEventModal(false); setPendingEventPlace(null) }}
+              onCreated={handleEventCreated}
+            />
+          )}
+
           {/* Invite modal */}
           {showInviteModal && (
             <InviteModal onClose={() => setShowInviteModal(false)} />
+          )}
+
+          {/* Profile modal */}
+          {showProfileModal && user && (
+            <ProfileModal
+              user={user}
+              onClose={() => setShowProfileModal(false)}
+            />
           )}
       </div>
     </div>

@@ -7,8 +7,10 @@ import {
   useMap,
 } from '@vis.gl/react-google-maps'
 import { type Location, getCategoryMeta } from '@/types'
+import type { Event, EventAttendee } from '@/types/events'
 import LocationCard from './LocationCard'
 import PoiCard from './PoiCard'
+import EventCard from './EventCard'
 
 // Moves the map to the user's real location on mount
 function GeolocationHandler() {
@@ -109,13 +111,46 @@ function MapControls() {
   )
 }
 
+/** Distinctive pin for event markers — purple calendar style */
+function EventPin({ title }: { title: string }) {
+  return (
+    <div
+      title={title}
+      style={{
+        width: 38,
+        height: 38,
+        borderRadius: '50% 50% 50% 0',
+        transform: 'rotate(-45deg)',
+        background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+        border: '2.5px solid white',
+        boxShadow: '0 2px 10px rgba(99,102,241,0.45)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+      }}
+    >
+      <span style={{ transform: 'rotate(45deg)', display: 'block', fontSize: 17, lineHeight: 1 }}>
+        📅
+      </span>
+    </div>
+  )
+}
+
 interface PoiClick { placeId: string; lat: number; lng: number }
+
+interface EventWithMeta extends Event {
+  myStatus?: EventAttendee['status']
+  attendeeCount?: number
+}
 
 interface MapProps {
   locations: Location[]
+  events: EventWithMeta[]
   currentUserId: string | null
   onDeleteLocation: (id: string) => void
   onAddFromPoi: (place: { name: string; address: string; lat: number; lng: number; placeId: string; googleMapsUrl: string }) => void
+  onCreateEventFromPoi?: (place: { name: string; address: string; lat: number; lng: number; placeId: string; googleMapsUrl: string }) => void
 }
 
 function CategoryPin({ category }: { category: string }) {
@@ -151,18 +186,34 @@ function PanToMarker({ position }: { position: google.maps.LatLngLiteral | null 
   return null
 }
 
-export default function MapComponent({ locations, currentUserId, onDeleteLocation, onAddFromPoi }: MapProps) {
+export default function MapComponent({
+  locations,
+  events,
+  currentUserId,
+  onDeleteLocation,
+  onAddFromPoi,
+  onCreateEventFromPoi,
+}: MapProps) {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
   const [selectedPoi, setSelectedPoi] = useState<PoiClick | null>(null)
+  const [selectedEvent, setSelectedEvent] = useState<EventWithMeta | null>(null)
 
   const handleMarkerClick = useCallback((location: Location) => {
     setSelectedPoi(null)
+    setSelectedEvent(null)
     setSelectedLocation(location)
+  }, [])
+
+  const handleEventMarkerClick = useCallback((event: EventWithMeta) => {
+    setSelectedPoi(null)
+    setSelectedLocation(null)
+    setSelectedEvent(event)
   }, [])
 
   const handleClose = useCallback(() => {
     setSelectedLocation(null)
     setSelectedPoi(null)
+    setSelectedEvent(null)
   }, [])
 
   const handleDelete = useCallback(
@@ -175,17 +226,22 @@ export default function MapComponent({ locations, currentUserId, onDeleteLocatio
     if (e.detail?.placeId) {
       e.stop?.()
       setSelectedLocation(null)
+      setSelectedEvent(null)
       setSelectedPoi({ placeId: e.detail.placeId, lat: e.detail.latLng?.lat ?? 0, lng: e.detail.latLng?.lng ?? 0 })
     } else {
       handleClose()
     }
   }, [handleClose])
 
+  const selectedPosition = selectedLocation
+    ? { lat: selectedLocation.lat, lng: selectedLocation.lng }
+    : selectedEvent
+      ? { lat: selectedEvent.lat, lng: selectedEvent.lng }
+      : null
+
   return (
     <>
-      <PanToMarker
-        position={selectedLocation ? { lat: selectedLocation.lat, lng: selectedLocation.lng } : null}
-      />
+      <PanToMarker position={selectedPosition} />
       <GoogleMap
         defaultCenter={{ lat: 37.7749, lng: -122.4194 }}
         defaultZoom={12}
@@ -198,6 +254,7 @@ export default function MapComponent({ locations, currentUserId, onDeleteLocatio
         <GeolocationHandler />
         <MapControls />
 
+        {/* Location pins */}
         {locations.map((loc) => (
           <AdvancedMarker
             key={loc.id}
@@ -206,6 +263,19 @@ export default function MapComponent({ locations, currentUserId, onDeleteLocatio
             title={loc.name}
           >
             <CategoryPin category={loc.category} />
+          </AdvancedMarker>
+        ))}
+
+        {/* Event pins — distinct purple/indigo style */}
+        {events.map((evt) => (
+          <AdvancedMarker
+            key={evt.id}
+            position={{ lat: evt.lat, lng: evt.lng }}
+            onClick={() => handleEventMarkerClick(evt)}
+            title={evt.title}
+            zIndex={10}
+          >
+            <EventPin title={evt.title} />
           </AdvancedMarker>
         ))}
 
@@ -221,6 +291,16 @@ export default function MapComponent({ locations, currentUserId, onDeleteLocatio
         />
       )}
 
+      {/* Event card */}
+      {selectedEvent && (
+        <EventCard
+          event={selectedEvent}
+          attendeeCount={selectedEvent.attendeeCount}
+          myStatus={selectedEvent.myStatus}
+          onClose={handleClose}
+        />
+      )}
+
       {/* POI tap card — intercepts Google's native InfoWindow */}
       {selectedPoi && (
         <PoiCard
@@ -229,6 +309,7 @@ export default function MapComponent({ locations, currentUserId, onDeleteLocatio
           lng={selectedPoi.lng}
           onClose={handleClose}
           onAdd={(place) => { onAddFromPoi(place); handleClose() }}
+          onCreateEvent={onCreateEventFromPoi ? (place) => { onCreateEventFromPoi(place); handleClose() } : undefined}
           alreadySaved={locations.some(l => l.place_id === selectedPoi.placeId)}
         />
       )}
