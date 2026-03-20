@@ -1,3 +1,5 @@
+'use client'
+
 import { type Location, getCategoryMeta } from '@/types'
 
 interface LocationCardProps {
@@ -7,96 +9,133 @@ interface LocationCardProps {
   onDelete: (id: string) => void
 }
 
-export default function LocationCard({
-  location,
-  currentUserId,
-  onClose,
-  onDelete,
-}: LocationCardProps) {
+export default function LocationCard({ location, currentUserId, onClose, onDelete }: LocationCardProps) {
   const meta = getCategoryMeta(location.category)
-  const isOwner = currentUserId && location.added_by === currentUserId
-
-  const googleMapsUrl =
-    location.google_maps_url ||
-    (location.place_id
-      ? `https://www.google.com/maps/place/?q=place_id:${location.place_id}`
-      : `https://www.google.com/maps/search/?api=1&query=${location.lat},${location.lng}`)
+  const isOwner = currentUserId === location.added_by
+  const formattedDate = new Date(location.created_at).toLocaleDateString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric'
+  })
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 w-72 overflow-hidden">
-      {/* Header band */}
-      <div className="h-1.5" style={{ backgroundColor: meta.color }} />
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-40"
+        onClick={onClose}
+      />
 
-      <div className="p-4">
-        {/* Title row */}
-        <div className="flex items-start justify-between gap-2 mb-3">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="text-xl flex-shrink-0">{meta.emoji}</span>
-            <div className="min-w-0">
-              <h3 className="font-semibold text-gray-900 text-sm leading-tight truncate">
-                {location.name}
-              </h3>
-              {location.address && (
-                <p className="text-xs text-gray-400 truncate mt-0.5">
-                  {location.address}
-                </p>
+      {/* Bottom sheet */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up">
+        {/* Sheet */}
+        <div className="bg-white rounded-t-3xl shadow-2xl mx-auto max-w-lg overflow-hidden">
+          {/* Drag handle */}
+          <div className="flex justify-center pt-3 pb-1">
+            <div className="w-10 h-1 bg-gray-200 rounded-full" />
+          </div>
+
+          {/* Category color bar */}
+          <div className="h-1 mx-5 rounded-full mt-2" style={{ backgroundColor: meta.color }} />
+
+          <div className="px-5 pt-3 pb-8">
+            {/* Header row */}
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div className="flex-1 min-w-0">
+                {/* Category badge */}
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <span className="text-sm">{meta.emoji}</span>
+                  <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: meta.color }}>
+                    {meta.label}
+                  </span>
+                </div>
+
+                {/* Name */}
+                <h2 className="text-xl font-bold text-gray-900 leading-tight truncate">
+                  {location.name}
+                </h2>
+
+                {/* Address */}
+                {location.address && (
+                  <p className="text-sm text-gray-400 mt-0.5 truncate">{location.address}</p>
+                )}
+              </div>
+
+              {/* Close button */}
+              <button
+                onClick={onClose}
+                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-colors flex-shrink-0 mt-0.5"
+              >
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
+                  <path d="M18 6 6 18M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+
+            {/* Notes */}
+            {location.description && (
+              <p className="text-sm text-gray-600 bg-gray-50 rounded-xl px-4 py-3 mb-3 leading-relaxed">
+                "{location.description}"
+              </p>
+            )}
+
+            {/* Added by + date */}
+            <div className="flex items-center gap-1.5 mb-4">
+              <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center">
+                <span className="text-xs font-bold text-emerald-600">
+                  {(location.added_by_name ?? '?').charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <span className="text-xs text-gray-400">
+                Added by <span className="font-medium text-gray-600">{location.added_by_name ?? 'Someone'}</span> · {formattedDate}
+              </span>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-2.5">
+              {/* Open in Google Maps — primary */}
+              <a
+                href={location.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location.name)}&query_place_id=${location.place_id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl text-white font-semibold text-sm transition-opacity hover:opacity-90 active:opacity-80"
+                style={{ backgroundColor: meta.color }}
+              >
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                </svg>
+                Open in Maps
+              </a>
+
+              {/* Street View */}
+              <a
+                href={`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${location.lat},${location.lng}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-1.5 py-3 px-4 rounded-2xl bg-gray-100 text-gray-600 font-semibold text-sm hover:bg-gray-200 transition-colors"
+                title="Street View"
+              >
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="#F9A825">
+                  <circle cx="12" cy="4.5" r="2.5"/>
+                  <path d="M12 8.5c-1.2 0-2.1.5-2.8 1.2L7.2 12.5l1.6 1.1 1.2-1.6V17l-1.5 4h2l1-3h1l1 3h2L14 17v-5l1.2 1.6 1.6-1.1-2-2.8c-.7-.7-1.6-1.2-2.8-1.2z"/>
+                </svg>
+                Street View
+              </a>
+
+              {/* Delete (owner only) */}
+              {isOwner && (
+                <button
+                  onClick={() => onDelete(location.id)}
+                  className="flex items-center justify-center w-12 h-12 rounded-2xl bg-red-50 text-red-400 hover:bg-red-100 hover:text-red-500 transition-colors"
+                  title="Remove location"
+                >
+                  <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+                    <path d="M3 6h18M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/>
+                  </svg>
+                </button>
               )}
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-            aria-label="Close"
-          >
-            ✕
-          </button>
-        </div>
-
-        {/* Category badge */}
-        <div className="flex items-center gap-2 mb-3">
-          <span
-            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-white"
-            style={{ backgroundColor: meta.color }}
-          >
-            {meta.label}
-          </span>
-          {location.added_by_name && (
-            <span className="text-xs text-gray-400">
-              added by <span className="font-medium text-gray-600">{location.added_by_name}</span>
-            </span>
-          )}
-        </div>
-
-        {/* Description */}
-        {location.description && (
-          <p className="text-sm text-gray-600 mb-4 leading-relaxed line-clamp-3">
-            {location.description}
-          </p>
-        )}
-
-        {/* Actions */}
-        <div className="flex gap-2">
-          <a
-            href={googleMapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold rounded-lg transition-colors"
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-            </svg>
-            Open in Maps
-          </a>
-          {isOwner && (
-            <button
-              onClick={() => onDelete(location.id)}
-              className="py-2 px-3 text-red-400 hover:text-red-600 hover:bg-red-50 text-xs font-medium rounded-lg transition-colors"
-            >
-              Delete
-            </button>
-          )}
         </div>
       </div>
-    </div>
+    </>
   )
 }

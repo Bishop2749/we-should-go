@@ -4,7 +4,6 @@ import { useState, useCallback, useEffect } from 'react'
 import {
   Map as GoogleMap,
   AdvancedMarker,
-  InfoWindow,
   useMap,
 } from '@vis.gl/react-google-maps'
 import { type Location, getCategoryMeta } from '@/types'
@@ -186,22 +185,17 @@ export default function MapComponent({ locations, currentUserId, onDeleteLocatio
           </AdvancedMarker>
         ))}
 
-        {selectedLocation && (
-          <InfoWindow
-            position={{ lat: selectedLocation.lat, lng: selectedLocation.lng }}
-            onCloseClick={handleClose}
-            pixelOffset={[0, -44]}
-            disableAutoPan
-          >
-            <LocationCard
-              location={selectedLocation}
-              currentUserId={currentUserId}
-              onClose={handleClose}
-              onDelete={handleDelete}
-            />
-          </InfoWindow>
-        )}
       </GoogleMap>
+
+      {/* Location card rendered outside map — full design control */}
+      {selectedLocation && (
+        <LocationCard
+          location={selectedLocation}
+          currentUserId={currentUserId}
+          onClose={handleClose}
+          onDelete={handleDelete}
+        />
+      )}
     </>
   )
 }
