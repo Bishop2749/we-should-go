@@ -8,6 +8,7 @@ import { type Location, type Category } from '@/types'
 import MapComponent from '@/components/Map'
 import AddLocationModal from '@/components/AddLocationModal'
 import SearchBar from '@/components/SearchBar'
+import InviteModal from '@/components/InviteModal'
 import { useRouter } from 'next/navigation'
 
 interface PlaceResult {
@@ -26,6 +27,7 @@ export default function MapPage() {
   const [user, setUser] = useState<User | null>(null)
   const [locations, setLocations] = useState<Location[]>([])
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showInviteModal, setShowInviteModal] = useState(false)
   const [pendingPlace, setPendingPlace] = useState<PlaceResult | null>(null)
 
   const handlePlaceSelected = useCallback((place: PlaceResult) => {
@@ -147,8 +149,33 @@ export default function MapPage() {
         {/* Search bar — primary action */}
         <SearchBar onPlaceSelected={handlePlaceSelected} />
 
-        {/* Right: avatar + sign out */}
+        {/* Right: invite + avatar + sign out */}
         <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Invite a friend button */}
+          <button
+            onClick={() => setShowInviteModal(true)}
+            title="Invite a friend"
+            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-emerald-600 font-medium transition-colors px-2 py-1.5 rounded-lg hover:bg-emerald-50"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <line x1="19" y1="8" x2="19" y2="14" />
+              <line x1="22" y1="11" x2="16" y2="11" />
+            </svg>
+            <span className="hidden sm:block">Invite</span>
+          </button>
+
           {avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -213,6 +240,11 @@ export default function MapPage() {
               onClose={() => { setShowAddModal(false); setPendingPlace(null) }}
               userName={userName}
             />
+          )}
+
+          {/* Invite modal */}
+          {showInviteModal && (
+            <InviteModal onClose={() => setShowInviteModal(false)} />
           )}
       </div>
     </div>
