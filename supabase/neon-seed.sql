@@ -1,0 +1,213 @@
+-- =============================================================
+-- Neon City Guide — Initial Seed Data
+-- 20 curated spots across Koreatown, Hollywood, Downtown,
+-- Miracle Mile, and North Hollywood
+-- Run AFTER neon-schema.sql
+-- =============================================================
+
+insert into locations (
+  id, name, description, category,
+  lat, lng, place_id, google_maps_url, address,
+  added_by, added_by_name,
+  neighborhood, source_name,
+  created_at
+) values
+
+-- ===================== KOREATOWN =====================
+
+(uuid_generate_v4(),
+ 'Hae Jang Chon Korean BBQ',
+ 'Old-school KBBQ with a devoted following. The galbi and bulgogi are textbook, the banchan generous, and the wood-paneled room is full of regulars who''ve been coming for decades. Order the short rib combo and ask for the extra garlic.',
+ 'restaurant', 34.0638885, -118.3060754,
+ 'ChIJqc1-Q5u4woARAzOO1E824cY', 'https://maps.google.com/?cid=14330795205766034179',
+ '3821 W 6th St, Los Angeles, CA 90020',
+ '00000000-0000-0000-0000-000000000099', 'Neon',
+ 'Koreatown', 'Neon', now()),
+
+(uuid_generate_v4(),
+ 'Park''s BBQ',
+ 'One of the most respected KBBQ spots in the country. Premium cuts, serious service, and a dining room that means business. If you''re going to do Korean BBQ in LA, this is the benchmark.',
+ 'restaurant', 34.0539567, -118.292058,
+ 'ChIJj6arSYLHwoAROfRRqiOfX2s', 'https://maps.google.com/?cid=7737077660375970873',
+ '955 S Vermont Ave G, Los Angeles, CA 90006',
+ '00000000-0000-0000-0000-000000000099', 'Neon',
+ 'Koreatown', 'Eater LA', now()),
+
+(uuid_generate_v4(),
+ 'Guelaguetza Restaurant',
+ 'The crown jewel of LA''s Oaxacan food scene, and one of the most important restaurants in the city full stop. The mole negro alone is worth the trip. Family-run, always packed, completely irreplaceable.',
+ 'restaurant', 34.0524074, -118.3006681,
+ 'ChIJKSPWlH-4woARrKJ5thvMBeY', 'https://maps.google.com/?cid=16574878423004586668',
+ '3014 W Olympic Blvd, Los Angeles, CA 90006',
+ '00000000-0000-0000-0000-000000000099', 'Neon',
+ 'Koreatown', 'LA Times', now()),
+
+(uuid_generate_v4(),
+ 'Cafe Brass Monkey',
+ 'Ktown''s legendary karaoke bar. Three floors of private rooms, a full bar, and an energy that doesn''t peak until midnight. This is the correct way to end a night in Koreatown. Reservations strongly advised on weekends.',
+ 'bar', 34.0611533, -118.2990076,
+ 'ChIJzW2xj33HwoARTsQxe1w7UfQ', 'https://maps.google.com/?cid=17604917686757868622',
+ '3440 Wilshire Blvd, Los Angeles, CA 90010',
+ '00000000-0000-0000-0000-000000000099', 'Neon',
+ 'Koreatown', 'Neon', now()),
+
+(uuid_generate_v4(),
+ 'California Donuts',
+ 'The neon-lit pastry case beckons 24 hours a day, 7 days a week. Come at 2am after the clubs or at 6am when you still haven''t slept. The crème brûlée donut is mandatory. A true LA institution.',
+ 'restaurant', 34.0577, -118.3086,
+ 'ChIJ_neon_california_donuts', 'https://www.google.com/maps/search/?api=1&query=California+Donuts+3540+W+8th+St+Los+Angeles',
+ '3540 W 8th St, Los Angeles, CA 90005',
+ '00000000-0000-0000-0000-000000000099', 'Neon',
+ 'Koreatown', 'Eater LA', now()),
+
+(uuid_generate_v4(),
+ 'Dan Sung Sa',
+ 'The quintessential Ktown late-night dive. Rickety wooden booths, old Korean pop posters, makeshift lamps, and grilled meats until 2am. No attitude, no frills — this is where the real night ends. Cash only vibes.',
+ 'bar', 34.0625, -118.3044,
+ 'ChIJ_neon_dan_sung_sa', 'https://www.google.com/maps/search/?api=1&query=Dan+Sung+Sa+3317+W+6th+St+Los+Angeles',
+ '3317 W 6th St, Los Angeles, CA 90020',
+ '00000000-0000-0000-0000-000000000099', 'Neon',
+ 'Koreatown', 'Neon', now()),
+
+-- ===================== HOLLYWOOD =====================
+
+(uuid_generate_v4(),
+ 'Roscoe''s Chicken & Waffles',
+ 'The original. A Los Angeles landmark since 1975. The combo plates are generous, the gravy is essential, and the celebrity sightings are just a bonus. There are other locations, but this is the one.',
+ 'restaurant', 34.0985783, -118.3221555,
+ 'ChIJPVN0GUi_woAR9fU08F9m0Ec', 'https://maps.google.com/?cid=5174748534086628853',
+ '1514 N Gower St, Los Angeles, CA 90028',
+ '00000000-0000-0000-0000-000000000099', 'Neon',
+ 'Hollywood', 'Neon', now()),
+
+(uuid_generate_v4(),
+ 'The Waffle',
+ 'Comfort food done right on Sunset. The waffles are what they''re named for, but the fried chicken sandwich and the mac & cheese deserve equal billing. Open late, which is when Hollywood needs it most.',
+ 'restaurant', 34.0982521, -118.3257458,
+ 'ChIJmWJZgDe_woARiCCIRpl900A', 'https://maps.google.com/?cid=4671215335780130952',
+ '6255 Sunset Blvd, Los Angeles, CA 90028',
+ '00000000-0000-0000-0000-000000000099', 'Neon',
+ 'Hollywood', 'Neon', now()),
+
+(uuid_generate_v4(),
+ 'Boardner''s by La Belle',
+ 'Hollywood''s oldest bar, open since 1942. Low lighting, red vinyl booths, and a dance floor that fills up on weekends. The kind of place that hasn''t tried to be anything other than exactly what it is for 80 years.',
+ 'bar', 34.1011311, -118.3348453,
+ 'ChIJUd_AriS_woARF6m37XOtD3U', 'https://maps.google.com/?cid=8435151340509309207',
+ '1652 N Cherokee Ave, Los Angeles, CA 90028',
+ '00000000-0000-0000-0000-000000000099', 'Neon',
+ 'Hollywood', 'Neon', now()),
+
+(uuid_generate_v4(),
+ 'Good Times at Davey Wayne''s',
+ 'Enter through a refrigerator. Inside: a sprawling 1970s backyard house party that never stopped. Themed cocktails, great music, and a crowd that''s genuinely having fun. One of Hollywood''s best-kept surprises.',
+ 'bar', 34.0998, -118.3308,
+ 'ChIJ_neon_davey_waynes', 'https://www.google.com/maps/search/?api=1&query=Good+Times+at+Davey+Wayne%27s+Hollywood',
+ '1611 N El Centro Ave, Los Angeles, CA 90028',
+ '00000000-0000-0000-0000-000000000099', 'Neon',
+ 'Hollywood', 'Neon', now()),
+
+(uuid_generate_v4(),
+ 'Jumbo''s Clown Room',
+ 'LA''s most storied dive bar and burlesque venue. Small, dark, loud, and completely itself since 1970. Courtney Love allegedly worked here once. The perfect unironic last stop.',
+ 'bar', 34.1018, -118.3025,
+ 'ChIJ_neon_jumbos', 'https://www.google.com/maps/search/?api=1&query=Jumbo%27s+Clown+Room+Hollywood',
+ '5153 Hollywood Blvd, Los Angeles, CA 90027',
+ '00000000-0000-0000-0000-000000000099', 'Neon',
+ 'Hollywood', 'Neon', now()),
+
+-- ===================== DOWNTOWN / ARTS DISTRICT =====================
+
+(uuid_generate_v4(),
+ 'Bottega Louie',
+ 'A grand, light-filled patisserie and restaurant in the heart of downtown. The macarons line the glass case like jewels. Go for brunch on a Sunday and let it take the whole morning. The gougères are mandatory.',
+ 'restaurant', 34.0470524, -118.2565439,
+ 'ChIJ_yXhTrTHwoARU36hVDFInhg', 'https://maps.google.com/?cid=1773934679941021267',
+ '700 S Grand Ave, Los Angeles, CA 90017',
+ '00000000-0000-0000-0000-000000000099', 'Neon',
+ 'Downtown', 'Neon', now()),
+
+(uuid_generate_v4(),
+ 'The Original Pantry Cafe',
+ 'Open 24 hours, 365 days a year, since 1924 — they literally don''t have a lock on the door. Cash only, massive portions, legendary coffee. A downtown LA institution that has outlasted everything around it.',
+ 'restaurant', 34.046374, -118.2629175,
+ 'ChIJDzHVFLfHwoARD8kHhr0hpPM', 'https://maps.google.com/?cid=17556194345278228751',
+ '877 S Figueroa St, Los Angeles, CA 90017',
+ '00000000-0000-0000-0000-000000000099', 'Neon',
+ 'Downtown', 'Neon', now()),
+
+(uuid_generate_v4(),
+ 'The Last Bookstore',
+ 'LA''s most iconic indie bookstore, built inside a former bank vault. Spiral staircases made of books, a sci-fi floor, vinyl records, and art galleries throughout. Budget time to get genuinely lost in here.',
+ 'activity', 34.0484, -118.2492,
+ 'ChIJ_neon_last_bookstore', 'https://www.google.com/maps/search/?api=1&query=The+Last+Bookstore+Los+Angeles',
+ '453 S Spring St, Los Angeles, CA 90013',
+ '00000000-0000-0000-0000-000000000099', 'Neon',
+ 'Downtown', 'Neon', now()),
+
+(uuid_generate_v4(),
+ 'The Broad',
+ 'Free admission on the first and third Tuesday of each month. The permanent collection — Koons, Basquiat, Cindy Sherman, Jeff Koons''s "Balloon Dog" — is world class. Book timed entry ahead; walk-up lines are long.',
+ 'activity', 34.0544, -118.2502,
+ 'ChIJ_neon_the_broad', 'https://www.google.com/maps/search/?api=1&query=The+Broad+Museum+Los+Angeles',
+ '221 S Grand Ave, Los Angeles, CA 90012',
+ '00000000-0000-0000-0000-000000000099', 'Neon',
+ 'Downtown', 'Neon', now()),
+
+-- ===================== MIRACLE MILE =====================
+
+(uuid_generate_v4(),
+ 'Los Angeles County Museum of Art',
+ 'The largest art museum in the western US. The free Urban Light installation out front is mandatory — especially at dusk. Free admission the second Tuesday of every month. Currently mid-renovation but the collection is still essential.',
+ 'activity', 34.0639323, -118.3592293,
+ 'ChIJsXqcyjy5woARNz6sOh0ZmwA', 'https://maps.google.com/?cid=43656234719264311',
+ '5905 Wilshire Blvd, Los Angeles, CA 90036',
+ '00000000-0000-0000-0000-000000000099', 'Neon',
+ 'Miracle Mile', 'Neon', now()),
+
+(uuid_generate_v4(),
+ 'La Brea Tar Pits and Museum',
+ 'Active Ice Age tar pits bubbling up in the middle of Wilshire Blvd. Scientists are still pulling out mammoth bones. Wild that this exists here. The museum is genuinely fascinating and underrated.',
+ 'activity', 34.06388, -118.356445,
+ 'ChIJ_yD1_SK5woARmWLyCit3znQ', 'https://maps.google.com/?cid=8416795780352991897',
+ '5801 Wilshire Blvd, Los Angeles, CA 90036',
+ '00000000-0000-0000-0000-000000000099', 'Neon',
+ 'Miracle Mile', 'Neon', now()),
+
+(uuid_generate_v4(),
+ 'Petersen Automotive Museum',
+ 'One of the best car museums in the world, in a building that looks like a chrome sculpture. Even if you''re not a car person, the Vault tour will make you one. The architecture alone is worth a look.',
+ 'activity', 34.062024, -118.3613631,
+ 'ChIJaRbaXjy5woARERNJSyktTog', 'https://maps.google.com/?cid=9821837492721619729',
+ '6060 Wilshire Blvd, Los Angeles, CA 90036',
+ '00000000-0000-0000-0000-000000000099', 'Neon',
+ 'Miracle Mile', 'Neon', now()),
+
+(uuid_generate_v4(),
+ 'Academy Museum of Motion Pictures',
+ 'The newest and most jaw-dropping museum in LA. The Sphere building alone is an architectural marvel. Rotating exhibits on film history, plus the permanent collection of props and costumes. The rooftop terrace view is free.',
+ 'activity', 34.0634806, -118.3608394,
+ 'ChIJD7BMrFa5woAR83gz5nQnn5I', 'https://maps.google.com/?cid=10565206633866295539',
+ '6067 Wilshire Blvd, Los Angeles, CA 90036',
+ '00000000-0000-0000-0000-000000000099', 'Neon',
+ 'Miracle Mile', 'Neon', now()),
+
+-- ===================== NORTH HOLLYWOOD =====================
+
+(uuid_generate_v4(),
+ 'Pitfire Pizza',
+ 'NoHo''s best pizza spot, with a wood-fired oven and a rotating seasonal menu. Great for a pre-show meal before catching something at one of the nearby theaters. The white pizza with truffle oil is the move.',
+ 'restaurant', 34.1650844, -118.3751676,
+ 'ChIJi54v1_OVwoAR8LLP_vKGRyA', 'https://maps.google.com/?cid=2325976110775382768',
+ '5203 Lankershim Blvd, North Hollywood, CA 91601',
+ '00000000-0000-0000-0000-000000000099', 'Neon',
+ 'NoHo', 'Neon', now()),
+
+(uuid_generate_v4(),
+ 'Republic Of Pie',
+ 'The neighborhood coffee shop NoHo actually deserves. Excellent pie (the key lime is definitive), strong coffee, and a room full of people who live here. Free Wi-Fi, good vibes, no pretension.',
+ 'restaurant', 34.1647278, -118.3731306,
+ 'ChIJj83PovOVwoARU_DIkrmdBUo', 'https://maps.google.com/?cid=5333842754047373395',
+ '11118 Magnolia Blvd, North Hollywood, CA 91601',
+ '00000000-0000-0000-0000-000000000099', 'Neon',
+ 'NoHo', 'Neon', now());
