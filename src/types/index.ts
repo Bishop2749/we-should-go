@@ -11,7 +11,12 @@ export interface Location {
   google_maps_url: string | null
   added_by: string | null
   added_by_name: string | null
+  neighborhood: string | null
+  source_name: string | null
+  source_url: string | null
 }
+
+export const NEON_USER_ID = '00000000-0000-0000-0000-000000000099'
 
 export type Category = 'restaurant' | 'bar' | 'activity' | 'event' | 'other'
 

@@ -45,6 +45,9 @@ export default function MapPage() {
   const [pendingPlace, setPendingPlace] = useState<PlaceResult | null>(null)
   const [pendingEventPlace, setPendingEventPlace] = useState<PlaceResult | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showNeonOverlay, setShowNeonOverlay] = useState(true)
+  const [neonNeighborhood, setNeonNeighborhood] = useState<string | null>(null)
+  const [neonCategory, setNeonCategory] = useState<string | null>(null)
 
   const handlePlaceSelected = useCallback((place: PlaceResult) => {
     setPendingPlace(place)
@@ -247,6 +250,20 @@ export default function MapPage() {
 
         {/* Right: calendar + invite + create event + avatar */}
         <div className="flex items-center gap-1 flex-shrink-0">
+          {/* Neon toggle */}
+          <button
+            onClick={() => setShowNeonOverlay(v => !v)}
+            className={`flex items-center gap-1 text-xs font-medium transition-colors px-2 py-1.5 rounded-lg ${
+              showNeonOverlay
+                ? 'text-amber-600 bg-amber-50 hover:bg-amber-100'
+                : 'text-gray-500 hover:text-amber-600 hover:bg-amber-50'
+            }`}
+            title="Neon city guide"
+          >
+            <span>✨</span>
+            <span className="hidden sm:block">Neon</span>
+          </button>
+
           {/* Calendar */}
           <Link
             href="/calendar"
@@ -364,7 +381,38 @@ export default function MapPage() {
               setPendingEventPlace(place)
               setShowCreateEventModal(true)
             }}
+            showNeonOverlay={showNeonOverlay}
+            neonFilters={{ neighborhood: neonNeighborhood, category: neonCategory }}
           />
+
+          {/* Neon filter bar — shown when overlay is active */}
+          {showNeonOverlay && (
+            <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
+              <select
+                value={neonNeighborhood ?? ''}
+                onChange={e => setNeonNeighborhood(e.target.value || null)}
+                className="text-xs bg-white/95 backdrop-blur-sm border border-amber-200 text-gray-700 rounded-xl px-3 py-2 shadow-md focus:outline-none focus:ring-2 focus:ring-amber-300 cursor-pointer"
+              >
+                <option value="">All neighborhoods</option>
+                <option value="Koreatown">Koreatown</option>
+                <option value="Downtown">Downtown</option>
+                <option value="Hollywood">Hollywood</option>
+                <option value="NoHo">NoHo</option>
+                <option value="Miracle Mile">Miracle Mile</option>
+              </select>
+              <select
+                value={neonCategory ?? ''}
+                onChange={e => setNeonCategory(e.target.value || null)}
+                className="text-xs bg-white/95 backdrop-blur-sm border border-amber-200 text-gray-700 rounded-xl px-3 py-2 shadow-md focus:outline-none focus:ring-2 focus:ring-amber-300 cursor-pointer"
+              >
+                <option value="">All categories</option>
+                <option value="restaurant">Restaurant</option>
+                <option value="bar">Bar</option>
+                <option value="activity">Activity</option>
+                <option value="event">Event</option>
+              </select>
+            </div>
+          )}
 
           {/* Category legend */}
           <div className="absolute bottom-6 left-4 sm:left-6 z-10">
@@ -377,6 +425,7 @@ export default function MapPage() {
                   { emoji: '🎉', label: 'Saved Event', color: '#a855f7' },
                   { emoji: '📍', label: 'Other', color: '#6b7280' },
                   { emoji: '📅', label: 'Event Pin', color: '#6366f1' },
+                  { emoji: '✨', label: 'Neon Pick', color: '#F59E0B' },
                 ].map(({ emoji, label, color }) => (
                   <div key={label} className="flex items-center gap-1.5">
                     <div

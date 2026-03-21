@@ -1,6 +1,6 @@
 'use client'
 
-import { type Location, getCategoryMeta } from '@/types'
+import { type Location, getCategoryMeta, NEON_USER_ID } from '@/types'
 
 interface LocationCardProps {
   location: Location
@@ -11,7 +11,8 @@ interface LocationCardProps {
 
 export default function LocationCard({ location, currentUserId, onClose, onDelete }: LocationCardProps) {
   const meta = getCategoryMeta(location.category)
-  const isOwner = currentUserId === location.added_by
+  const isNeon = location.added_by === NEON_USER_ID
+  const isOwner = !isNeon && currentUserId === location.added_by
   const formattedDate = new Date(location.created_at).toLocaleDateString('en-US', {
     month: 'short', day: 'numeric', year: 'numeric'
   })
@@ -33,19 +34,37 @@ export default function LocationCard({ location, currentUserId, onClose, onDelet
             <div className="w-10 h-1 bg-gray-200 rounded-full" />
           </div>
 
-          {/* Category color bar */}
-          <div className="h-1 mx-5 rounded-full mt-2" style={{ backgroundColor: meta.color }} />
+          {/* Color bar — amber gradient for Neon, category color for others */}
+          {isNeon ? (
+            <div className="h-1 mx-5 rounded-full mt-2" style={{ background: 'linear-gradient(90deg, #F59E0B, #EF4444)' }} />
+          ) : (
+            <div className="h-1 mx-5 rounded-full mt-2" style={{ backgroundColor: meta.color }} />
+          )}
 
           <div className="px-5 pt-3 pb-8">
+            {/* Neon recommends header */}
+            {isNeon && (
+              <div className="flex items-center gap-1.5 mb-3 py-2 px-3 bg-amber-50 rounded-xl border border-amber-100">
+                <span className="text-base">✨</span>
+                <span className="text-xs font-semibold text-amber-600 uppercase tracking-wide">Neon recommends</span>
+                <span className="ml-auto text-xs text-amber-400 italic">Your LA city guide</span>
+              </div>
+            )}
+
             {/* Header row */}
             <div className="flex items-start justify-between gap-3 mb-3">
               <div className="flex-1 min-w-0">
-                {/* Category badge */}
-                <div className="flex items-center gap-1.5 mb-1.5">
+                {/* Category badge + neighborhood */}
+                <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
                   <span className="text-sm">{meta.emoji}</span>
-                  <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: meta.color }}>
+                  <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: isNeon ? '#D97706' : meta.color }}>
                     {meta.label}
                   </span>
+                  {isNeon && location.neighborhood && (
+                    <span className="text-xs bg-amber-50 text-amber-700 border border-amber-200 rounded-full px-2 py-0.5 font-medium">
+                      {location.neighborhood}
+                    </span>
+                  )}
                 </div>
 
                 {/* Name */}
@@ -73,21 +92,37 @@ export default function LocationCard({ location, currentUserId, onClose, onDelet
             {/* Notes */}
             {location.description && (
               <p className="text-sm text-gray-600 bg-gray-50 rounded-xl px-4 py-3 mb-3 leading-relaxed">
-                "{location.description}"
+                &ldquo;{location.description}&rdquo;
               </p>
             )}
 
-            {/* Added by + date */}
-            <div className="flex items-center gap-1.5 mb-4">
-              <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center">
-                <span className="text-xs font-bold text-emerald-600">
-                  {(location.added_by_name ?? '?').charAt(0).toUpperCase()}
+            {/* Source attribution (Neon only) */}
+            {isNeon && location.source_name && (
+              <p className="text-xs text-gray-400 italic mb-3">
+                — {location.source_url ? (
+                  <a href={location.source_url} target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-600 transition-colors">
+                    {location.source_name}
+                  </a>
+                ) : location.source_name}
+              </p>
+            )}
+
+            {/* Added by + date (non-Neon only) */}
+            {!isNeon && (
+              <div className="flex items-center gap-1.5 mb-4">
+                <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <span className="text-xs font-bold text-emerald-600">
+                    {(location.added_by_name ?? '?').charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <span className="text-xs text-gray-400">
+                  Added by <span className="font-medium text-gray-600">{location.added_by_name ?? 'Someone'}</span> · {formattedDate}
                 </span>
               </div>
-              <span className="text-xs text-gray-400">
-                Added by <span className="font-medium text-gray-600">{location.added_by_name ?? 'Someone'}</span> · {formattedDate}
-              </span>
-            </div>
+            )}
+
+            {/* Spacing for Neon cards before actions */}
+            {isNeon && <div className="mb-4" />}
 
             {/* Actions */}
             <div className="flex gap-2.5">
@@ -97,7 +132,7 @@ export default function LocationCard({ location, currentUserId, onClose, onDelet
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl text-white font-semibold text-sm transition-opacity hover:opacity-90 active:opacity-80"
-                style={{ backgroundColor: meta.color }}
+                style={{ backgroundColor: isNeon ? '#F59E0B' : meta.color }}
               >
                 <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
@@ -120,7 +155,7 @@ export default function LocationCard({ location, currentUserId, onClose, onDelet
                 Street View
               </a>
 
-              {/* Delete (owner only) */}
+              {/* Delete (owner only, never for Neon) */}
               {isOwner && (
                 <button
                   onClick={() => onDelete(location.id)}

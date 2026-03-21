@@ -6,7 +6,7 @@ import {
   AdvancedMarker,
   useMap,
 } from '@vis.gl/react-google-maps'
-import { type Location, getCategoryMeta } from '@/types'
+import { type Location, getCategoryMeta, NEON_USER_ID } from '@/types'
 import type { Event, EventAttendee } from '@/types/events'
 import LocationCard from './LocationCard'
 import PoiCard from './PoiCard'
@@ -151,6 +151,30 @@ interface MapProps {
   onDeleteLocation: (id: string) => void
   onAddFromPoi: (place: { name: string; address: string; lat: number; lng: number; placeId: string; googleMapsUrl: string }) => void
   onCreateEventFromPoi?: (place: { name: string; address: string; lat: number; lng: number; placeId: string; googleMapsUrl: string }) => void
+  showNeonOverlay: boolean
+  neonFilters: { neighborhood: string | null; category: string | null }
+}
+
+/** Distinctive Neon pin — gold/amber gradient with sparkle */
+function NeonPin() {
+  return (
+    <div
+      style={{
+        width: 40,
+        height: 40,
+        borderRadius: '50%',
+        background: 'linear-gradient(135deg, #F59E0B, #EF4444)',
+        border: '2.5px solid white',
+        boxShadow: '0 2px 8px rgba(245,158,11,0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+      }}
+    >
+      <span style={{ fontSize: 18, lineHeight: 1 }}>✨</span>
+    </div>
+  )
 }
 
 function CategoryPin({ category }: { category: string }) {
@@ -193,6 +217,8 @@ export default function MapComponent({
   onDeleteLocation,
   onAddFromPoi,
   onCreateEventFromPoi,
+  showNeonOverlay,
+  neonFilters,
 }: MapProps) {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
   const [selectedPoi, setSelectedPoi] = useState<PoiClick | null>(null)
@@ -233,6 +259,14 @@ export default function MapComponent({
     }
   }, [handleClose])
 
+  const visibleLocations = locations.filter(loc => {
+    const isNeon = loc.added_by === NEON_USER_ID
+    if (isNeon && !showNeonOverlay) return false
+    if (isNeon && neonFilters.neighborhood && loc.neighborhood !== neonFilters.neighborhood) return false
+    if (isNeon && neonFilters.category && loc.category !== neonFilters.category) return false
+    return true
+  })
+
   const selectedPosition = selectedLocation
     ? { lat: selectedLocation.lat, lng: selectedLocation.lng }
     : selectedEvent
@@ -255,14 +289,19 @@ export default function MapComponent({
         <MapControls />
 
         {/* Location pins */}
-        {locations.map((loc) => (
+        {visibleLocations.map((loc) => (
           <AdvancedMarker
             key={loc.id}
             position={{ lat: loc.lat, lng: loc.lng }}
             onClick={() => handleMarkerClick(loc)}
             title={loc.name}
+            zIndex={loc.added_by === NEON_USER_ID ? 5 : 1}
           >
-            <CategoryPin category={loc.category} />
+            {loc.added_by === NEON_USER_ID ? (
+              <NeonPin />
+            ) : (
+              <CategoryPin category={loc.category} />
+            )}
           </AdvancedMarker>
         ))}
 
