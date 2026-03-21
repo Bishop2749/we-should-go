@@ -34,13 +34,26 @@ const DARK_MAP_STYLES: google.maps.MapTypeStyle[] = [
 ]
 
 // Moves the map to the user's real location on mount
+const DEFAULT_CENTER = { lat: 34.0522, lng: -118.2437 } // Los Angeles
+
+function getInitialCenter() {
+  if (typeof window === 'undefined') return DEFAULT_CENTER
+  try {
+    const saved = localStorage.getItem('wsg_last_location')
+    if (saved) return JSON.parse(saved)
+  } catch {}
+  return DEFAULT_CENTER
+}
+
 function GeolocationHandler() {
   const map = useMap()
   useEffect(() => {
     if (!map || !navigator.geolocation) return
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        map.setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude }
+        map.setCenter(loc)
+        try { localStorage.setItem('wsg_last_location', JSON.stringify(loc)) } catch {}
         map.setZoom(13)
       },
       () => {}
@@ -324,7 +337,7 @@ export default function MapComponent({
     <>
       <PanToMarker position={selectedPosition} />
       <GoogleMap
-        defaultCenter={{ lat: 37.7749, lng: -122.4194 }}
+        defaultCenter={getInitialCenter()}
         defaultZoom={12}
         mapId="we-should-go-map"
         gestureHandling="greedy"
