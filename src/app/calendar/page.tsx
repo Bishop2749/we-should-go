@@ -27,7 +27,7 @@ function RsvpBadge({ status, isOrganizer }: { status?: EventAttendee['status']; 
   if (status === 'declined') {
     return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-50 text-red-600 text-xs font-semibold">✗ Can't go</span>
   }
-  return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-xs font-semibold">Invited</span>
+  return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs font-semibold">Invited</span>
 }
 
 function groupEvents(events: EventWithRsvp[]): Record<string, EventWithRsvp[]> {
@@ -141,21 +141,21 @@ export default function CalendarPage() {
   const hasAny = events.length > 0
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-white border-b border-gray-100 shadow-sm">
+      <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 shadow-sm">
         <div className="max-w-lg mx-auto px-4 h-14 flex items-center gap-3">
-          <Link href="/map" className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200">
+          <Link href="/map" className="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
             <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
           </Link>
           <div className="flex items-center gap-2 flex-1">
             <span className="text-lg">🗓️</span>
-            <h1 className="font-bold text-gray-900">My Calendar</h1>
+            <h1 className="font-bold text-gray-900 dark:text-white">My Calendar</h1>
           </div>
           {user && (
             <Link
               href="/map"
-              className="flex items-center gap-1.5 text-xs text-indigo-600 font-semibold hover:text-indigo-700 px-3 py-1.5 rounded-xl hover:bg-indigo-50"
+              className="flex items-center gap-1.5 text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:text-indigo-700 dark:hover:text-indigo-300 px-3 py-1.5 rounded-xl hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
             >
               + Create Event
             </Link>
@@ -168,14 +168,14 @@ export default function CalendarPage() {
           <div className="flex items-center justify-center py-16">
             <div className="flex flex-col items-center gap-3">
               <div className="w-7 h-7 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-              <p className="text-sm text-gray-500">Loading events…</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Loading events…</p>
             </div>
           </div>
         ) : !hasAny ? (
           <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
             <div className="text-6xl">🗓️</div>
-            <h2 className="text-xl font-bold text-gray-900">No upcoming events</h2>
-            <p className="text-gray-500 text-sm max-w-xs">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">No upcoming events</h2>
+            <p className="text-gray-500 dark:text-gray-400 text-sm max-w-xs">
               No upcoming events — create one from the map!
             </p>
             <Link
@@ -191,13 +191,13 @@ export default function CalendarPage() {
               if (groupEvents.length === 0) return null
               return (
                 <div key={group}>
-                  <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 px-1">{group}</h2>
+                  <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 px-1">{group}</h2>
                   <div className="space-y-3">
                     {groupEvents.map(event => (
                       <Link
                         key={event.id}
                         href={`/event/${event.id}`}
-                        className="block bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-4 hover:shadow-md transition-shadow"
+                        className="block bg-white dark:bg-gray-800 rounded-2xl shadow-sm dark:shadow-black/20 border border-gray-100 dark:border-gray-700 px-4 py-4 hover:shadow-md dark:hover:shadow-black/30 transition-shadow"
                       >
                         <div className="flex items-start justify-between gap-3">
                           {/* Left: date block */}
@@ -213,16 +213,16 @@ export default function CalendarPage() {
                           {/* Main content */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5 mb-0.5">
-                              <h3 className="text-sm font-bold text-gray-900 truncate">{event.title}</h3>
-                              {event.visibility === 'private' && <span className="text-gray-400 text-xs">🔒</span>}
+                              <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate">{event.title}</h3>
+                              {event.visibility === 'private' && <span className="text-gray-400 dark:text-gray-500 text-xs">🔒</span>}
                             </div>
-                            <p className="text-xs text-gray-500 truncate">{event.location_name}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{event.location_name}</p>
                             <div className="flex items-center gap-3 mt-2">
-                              <span className="text-xs text-gray-400">
+                              <span className="text-xs text-gray-400 dark:text-gray-500">
                                 {formatEventTime(event.starts_at)}
                               </span>
                               {event.attendeeCount > 0 && (
-                                <span className="text-xs text-gray-400">
+                                <span className="text-xs text-gray-400 dark:text-gray-500">
                                   👥 {event.attendeeCount} going
                                 </span>
                               )}

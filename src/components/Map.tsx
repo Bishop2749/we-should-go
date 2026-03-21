@@ -12,6 +12,27 @@ import LocationCard from './LocationCard'
 import PoiCard from './PoiCard'
 import EventCard from './EventCard'
 
+const DARK_MAP_STYLES: google.maps.MapTypeStyle[] = [
+  { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#242f3e' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#746855' }] },
+  { featureType: 'administrative.locality', elementType: 'labels.text.fill', stylers: [{ color: '#d59563' }] },
+  { featureType: 'poi', elementType: 'labels.text.fill', stylers: [{ color: '#d59563' }] },
+  { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#263c3f' }] },
+  { featureType: 'poi.park', elementType: 'labels.text.fill', stylers: [{ color: '#6b9a76' }] },
+  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#38414e' }] },
+  { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#212a37' }] },
+  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#9ca5b3' }] },
+  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#746855' }] },
+  { featureType: 'road.highway', elementType: 'geometry.stroke', stylers: [{ color: '#1f2835' }] },
+  { featureType: 'road.highway', elementType: 'labels.text.fill', stylers: [{ color: '#f3d19c' }] },
+  { featureType: 'transit', elementType: 'geometry', stylers: [{ color: '#2f3948' }] },
+  { featureType: 'transit.station', elementType: 'labels.text.fill', stylers: [{ color: '#d59563' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#17263c' }] },
+  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#515c6d' }] },
+  { featureType: 'water', elementType: 'labels.text.stroke', stylers: [{ color: '#17263c' }] },
+]
+
 // Moves the map to the user's real location on mount
 function GeolocationHandler() {
   const map = useMap()
@@ -31,6 +52,16 @@ function GeolocationHandler() {
 // Custom controls — compact, rounded, matching Google Maps mobile style
 function MapControls() {
   const map = useMap()
+  const [isDark, setIsDark] = useState(false)
+
+  useEffect(() => {
+    setIsDark(document.documentElement.classList.contains('dark'))
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'))
+    })
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
 
   const zoomIn = () => map?.setZoom((map.getZoom() ?? 12) + 1)
   const zoomOut = () => map?.setZoom((map.getZoom() ?? 12) - 1)
@@ -42,10 +73,16 @@ function MapControls() {
     )
   }
 
+  const cardBg = isDark ? '#1f2937' : 'white'
+  const cardBorder = isDark ? '1px solid #374151' : 'none'
+  const btnColor = isDark ? '#d1d5db' : '#444'
+  const hoverBg = isDark ? '#374151' : '#f0f0f0'
+
   const card = {
-    background: 'white',
+    background: cardBg,
+    border: cardBorder,
     borderRadius: 12,
-    boxShadow: '0 2px 6px rgba(0,0,0,0.18)',
+    boxShadow: isDark ? '0 2px 6px rgba(0,0,0,0.5)' : '0 2px 6px rgba(0,0,0,0.18)',
     overflow: 'hidden' as const,
     display: 'flex',
     flexDirection: 'column' as const,
@@ -57,7 +94,7 @@ function MapControls() {
     background: 'transparent',
     cursor: 'pointer',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    color: '#444',
+    color: btnColor,
     fontSize: 20,
     fontWeight: 300,
     transition: 'background 0.15s',
@@ -71,11 +108,11 @@ function MapControls() {
           style={btn}
           onClick={recenter}
           aria-label="My location"
-          onMouseEnter={e => (e.currentTarget.style.background = '#f0f0f0')}
+          onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
         >
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#444" strokeWidth="1.8" strokeLinecap="round">
-            <circle cx="12" cy="12" r="3.5" fill="#444" stroke="none"/>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke={btnColor} strokeWidth="1.8" strokeLinecap="round">
+            <circle cx="12" cy="12" r="3.5" fill={btnColor} stroke="none"/>
             <line x1="12" y1="2" x2="12" y2="6"/>
             <line x1="12" y1="18" x2="12" y2="22"/>
             <line x1="2" y1="12" x2="6" y2="12"/>
@@ -88,10 +125,10 @@ function MapControls() {
       {/* Zoom */}
       <div style={card}>
         <button
-          style={{ ...btn, borderBottom: '1px solid #e8e8e8' }}
+          style={{ ...btn, borderBottom: isDark ? '1px solid #374151' : '1px solid #e8e8e8' }}
           onClick={zoomIn}
           aria-label="Zoom in"
-          onMouseEnter={e => (e.currentTarget.style.background = '#f0f0f0')}
+          onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
         >
           +
@@ -100,7 +137,7 @@ function MapControls() {
           style={btn}
           onClick={zoomOut}
           aria-label="Zoom out"
-          onMouseEnter={e => (e.currentTarget.style.background = '#f0f0f0')}
+          onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
         >
           −
@@ -223,6 +260,16 @@ export default function MapComponent({
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
   const [selectedPoi, setSelectedPoi] = useState<PoiClick | null>(null)
   const [selectedEvent, setSelectedEvent] = useState<EventWithMeta | null>(null)
+  const [isDark, setIsDark] = useState(false)
+
+  useEffect(() => {
+    setIsDark(document.documentElement.classList.contains('dark'))
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'))
+    })
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
 
   const handleMarkerClick = useCallback((location: Location) => {
     setSelectedPoi(null)
@@ -284,6 +331,7 @@ export default function MapComponent({
         disableDefaultUI={true}
         style={{ width: '100%', height: '100%' }}
         onClick={handleMapClick}
+        styles={isDark ? DARK_MAP_STYLES : undefined}
       >
         <GeolocationHandler />
         <MapControls />

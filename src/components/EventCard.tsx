@@ -22,10 +22,10 @@ export default function EventCard({ event, attendeeCount = 0, myStatus, onClose 
 
       {/* Bottom sheet */}
       <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up">
-        <div className="bg-white rounded-t-3xl shadow-2xl mx-auto max-w-lg overflow-hidden">
+        <div className="bg-white dark:bg-gray-900 rounded-t-3xl shadow-2xl dark:shadow-black/30 mx-auto max-w-lg overflow-hidden">
           {/* Drag handle */}
           <div className="flex justify-center pt-3 pb-1">
-            <div className="w-10 h-1 bg-gray-200 rounded-full" />
+            <div className="w-10 h-1 bg-gray-200 dark:bg-gray-700 rounded-full" />
           </div>
 
           {/* Purple accent bar */}
@@ -37,21 +37,21 @@ export default function EventCard({ event, attendeeCount = 0, myStatus, onClose 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 mb-1.5">
                   <span className="text-sm">📅</span>
-                  <span className="text-xs font-semibold uppercase tracking-wide text-indigo-600">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">
                     Event
                   </span>
                   {event.visibility === 'private' && (
-                    <span className="text-xs text-gray-400">🔒</span>
+                    <span className="text-xs text-gray-400 dark:text-gray-500">🔒</span>
                   )}
                 </div>
-                <h2 className="text-xl font-bold text-gray-900 leading-tight truncate">{event.title}</h2>
-                <p className="text-sm text-gray-400 mt-0.5 truncate">{event.location_name}</p>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white leading-tight truncate">{event.title}</h2>
+                <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5 truncate">{event.location_name}</p>
               </div>
 
               {/* Close button */}
               <button
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-colors flex-shrink-0 mt-0.5"
+                className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-600 dark:hover:text-white transition-colors flex-shrink-0 mt-0.5"
               >
                 <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
                   <path d="M18 6 6 18M6 6l12 12"/>
@@ -60,10 +60,10 @@ export default function EventCard({ event, attendeeCount = 0, myStatus, onClose 
             </div>
 
             {/* Date/time */}
-            <div className="bg-indigo-50 rounded-xl px-4 py-3 mb-3">
-              <p className="text-sm font-semibold text-indigo-800">{formatEventDate(event.starts_at)}</p>
+            <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl px-4 py-3 mb-3">
+              <p className="text-sm font-semibold text-indigo-800 dark:text-indigo-300">{formatEventDate(event.starts_at)}</p>
               {event.ends_at && (
-                <p className="text-xs text-indigo-500 mt-0.5">
+                <p className="text-xs text-indigo-500 dark:text-indigo-400 mt-0.5">
                   Ends {new Date(event.ends_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                 </p>
               )}
@@ -71,24 +71,24 @@ export default function EventCard({ event, attendeeCount = 0, myStatus, onClose 
 
             {/* Organizer + attendees */}
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center">
-                <span className="text-xs font-bold text-indigo-600">
+              <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
                   {event.organizer_name.charAt(0).toUpperCase()}
                 </span>
               </div>
-              <span className="text-xs text-gray-400">
-                By <span className="font-medium text-gray-600">{event.organizer_name}</span>
+              <span className="text-xs text-gray-400 dark:text-gray-500">
+                By <span className="font-medium text-gray-600 dark:text-gray-300">{event.organizer_name}</span>
               </span>
               {attendeeCount > 0 && (
                 <>
-                  <span className="text-gray-200">·</span>
-                  <span className="text-xs text-gray-400">👥 {attendeeCount} going</span>
+                  <span className="text-gray-200 dark:text-gray-700">·</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500">👥 {attendeeCount} going</span>
                 </>
               )}
               {myStatus && (
                 <>
-                  <span className="text-gray-200">·</span>
-                  <span className={`text-xs font-semibold ${myStatus === 'accepted' ? 'text-emerald-600' : myStatus === 'declined' ? 'text-red-500' : 'text-gray-500'}`}>
+                  <span className="text-gray-200 dark:text-gray-700">·</span>
+                  <span className={`text-xs font-semibold ${myStatus === 'accepted' ? 'text-emerald-600' : myStatus === 'declined' ? 'text-red-500' : 'text-gray-500 dark:text-gray-400'}`}>
                     {myStatus === 'accepted' ? '✓ Going' : myStatus === 'declined' ? '✗ Declined' : 'Invited'}
                   </span>
                 </>
@@ -111,7 +111,7 @@ export default function EventCard({ event, attendeeCount = 0, myStatus, onClose 
                 href={mapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-1.5 py-3 px-4 rounded-2xl bg-gray-100 text-gray-600 font-semibold text-sm hover:bg-gray-200 transition-colors"
+                className="flex items-center justify-center gap-1.5 py-3 px-4 rounded-2xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 title="Open in Maps"
               >
                 <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">

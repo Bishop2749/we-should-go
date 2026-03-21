@@ -133,22 +133,22 @@ export default function FriendsPanel({ currentUserId, onClose, onInvite }: Frien
   return (
     <div
       ref={panelRef}
-      className="absolute top-14 right-0 z-50 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden"
+      className="absolute top-14 right-0 z-50 w-80 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl dark:shadow-black/30 border border-gray-100 dark:border-gray-700 overflow-hidden"
       style={{ margin: '8px 12px 0 0' }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-gray-50">
+      <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-gray-50 dark:border-gray-800">
         <div>
-          <h2 className="font-bold text-gray-900 text-base">Friends</h2>
+          <h2 className="font-bold text-gray-900 dark:text-white text-base">Friends</h2>
           {!loading && (
-            <p className="text-xs text-gray-400 mt-0.5">
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
               {friends.length === 0 ? 'No friends yet' : `${friends.length} friend${friends.length !== 1 ? 's' : ''}`}
             </p>
           )}
         </div>
         <button
           onClick={onClose}
-          className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200 transition-colors"
+          className="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
         >
           <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
             <path d="M18 6 6 18M6 6l12 12"/>
@@ -165,17 +165,17 @@ export default function FriendsPanel({ currentUserId, onClose, onInvite }: Frien
         ) : friends.length === 0 ? (
           <div className="text-center py-8 px-4">
             <div className="text-3xl mb-2">👥</div>
-            <p className="text-sm text-gray-500 font-medium">No friends yet</p>
-            <p className="text-xs text-gray-400 mt-1">Invite someone to get started</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">No friends yet</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Invite someone to get started</p>
           </div>
         ) : (
-          <ul className="divide-y divide-gray-50">
+          <ul className="divide-y divide-gray-50 dark:divide-gray-800">
             {friends.map(friend => (
-              <li key={friend.id} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 group transition-colors">
+              <li key={friend.id} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 group transition-colors">
                 <Avatar name={friend.display_name} url={friend.avatar_url} size={38} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">{friend.display_name}</p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{friend.display_name}</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">
                     {friend.location_count === 0
                       ? 'No locations saved yet'
                       : `${friend.location_count} location${friend.location_count !== 1 ? 's' : ''} saved`}
@@ -184,7 +184,7 @@ export default function FriendsPanel({ currentUserId, onClose, onInvite }: Frien
                 <button
                   onClick={() => removeFriend(friend.friendship_id)}
                   disabled={removing === friend.friendship_id}
-                  className="opacity-0 group-hover:opacity-100 w-7 h-7 rounded-full bg-red-50 flex items-center justify-center text-red-400 hover:bg-red-100 transition-all"
+                  className="opacity-0 group-hover:opacity-100 w-7 h-7 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-all"
                   title="Remove friend"
                 >
                   {removing === friend.friendship_id ? (
@@ -202,7 +202,7 @@ export default function FriendsPanel({ currentUserId, onClose, onInvite }: Frien
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-3 border-t border-gray-50">
+      <div className="px-4 py-3 border-t border-gray-50 dark:border-gray-800">
         <button
           onClick={onInvite}
           className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold transition-colors"

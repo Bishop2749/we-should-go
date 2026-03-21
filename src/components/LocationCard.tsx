@@ -28,10 +28,10 @@ export default function LocationCard({ location, currentUserId, onClose, onDelet
       {/* Bottom sheet */}
       <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up">
         {/* Sheet */}
-        <div className="bg-white rounded-t-3xl shadow-2xl mx-auto max-w-lg overflow-hidden">
+        <div className="bg-white dark:bg-gray-900 rounded-t-3xl shadow-2xl dark:shadow-black/30 mx-auto max-w-lg overflow-hidden">
           {/* Drag handle */}
           <div className="flex justify-center pt-3 pb-1">
-            <div className="w-10 h-1 bg-gray-200 rounded-full" />
+            <div className="w-10 h-1 bg-gray-200 dark:bg-gray-700 rounded-full" />
           </div>
 
           {/* Color bar — amber gradient for Neon, category color for others */}
@@ -44,10 +44,10 @@ export default function LocationCard({ location, currentUserId, onClose, onDelet
           <div className="px-5 pt-3 pb-8">
             {/* Neon recommends header */}
             {isNeon && (
-              <div className="flex items-center gap-1.5 mb-3 py-2 px-3 bg-amber-50 rounded-xl border border-amber-100">
+              <div className="flex items-center gap-1.5 mb-3 py-2 px-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-100 dark:border-amber-800">
                 <span className="text-base">✨</span>
-                <span className="text-xs font-semibold text-amber-600 uppercase tracking-wide">Neon recommends</span>
-                <span className="ml-auto text-xs text-amber-400 italic">Your LA city guide</span>
+                <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wide">Neon recommends</span>
+                <span className="ml-auto text-xs text-amber-400 dark:text-amber-500 italic">Your LA city guide</span>
               </div>
             )}
 
@@ -61,27 +61,27 @@ export default function LocationCard({ location, currentUserId, onClose, onDelet
                     {meta.label}
                   </span>
                   {isNeon && location.neighborhood && (
-                    <span className="text-xs bg-amber-50 text-amber-700 border border-amber-200 rounded-full px-2 py-0.5 font-medium">
+                    <span className="text-xs bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-700 rounded-full px-2 py-0.5 font-medium">
                       {location.neighborhood}
                     </span>
                   )}
                 </div>
 
                 {/* Name */}
-                <h2 className="text-xl font-bold text-gray-900 leading-tight truncate">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white leading-tight truncate">
                   {location.name}
                 </h2>
 
                 {/* Address */}
                 {location.address && (
-                  <p className="text-sm text-gray-400 mt-0.5 truncate">{location.address}</p>
+                  <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5 truncate">{location.address}</p>
                 )}
               </div>
 
               {/* Close button */}
               <button
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-colors flex-shrink-0 mt-0.5"
+                className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-600 dark:hover:text-white transition-colors flex-shrink-0 mt-0.5"
               >
                 <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
                   <path d="M18 6 6 18M6 6l12 12"/>
@@ -91,16 +91,16 @@ export default function LocationCard({ location, currentUserId, onClose, onDelet
 
             {/* Notes */}
             {location.description && (
-              <p className="text-sm text-gray-600 bg-gray-50 rounded-xl px-4 py-3 mb-3 leading-relaxed">
+              <p className="text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-3 mb-3 leading-relaxed">
                 &ldquo;{location.description}&rdquo;
               </p>
             )}
 
             {/* Source attribution (Neon only) */}
             {isNeon && location.source_name && (
-              <p className="text-xs text-gray-400 italic mb-3">
+              <p className="text-xs text-gray-400 dark:text-gray-500 italic mb-3">
                 — {location.source_url ? (
-                  <a href={location.source_url} target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-600 transition-colors">
+                  <a href={location.source_url} target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
                     {location.source_name}
                   </a>
                 ) : location.source_name}
@@ -110,13 +110,13 @@ export default function LocationCard({ location, currentUserId, onClose, onDelet
             {/* Added by + date (non-Neon only) */}
             {!isNeon && (
               <div className="flex items-center gap-1.5 mb-4">
-                <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center">
-                  <span className="text-xs font-bold text-emerald-600">
+                <div className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
                     {(location.added_by_name ?? '?').charAt(0).toUpperCase()}
                   </span>
                 </div>
-                <span className="text-xs text-gray-400">
-                  Added by <span className="font-medium text-gray-600">{location.added_by_name ?? 'Someone'}</span> · {formattedDate}
+                <span className="text-xs text-gray-400 dark:text-gray-500">
+                  Added by <span className="font-medium text-gray-600 dark:text-gray-300">{location.added_by_name ?? 'Someone'}</span> · {formattedDate}
                 </span>
               </div>
             )}
@@ -145,7 +145,7 @@ export default function LocationCard({ location, currentUserId, onClose, onDelet
                 href={`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${location.lat},${location.lng}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-1.5 py-3 px-4 rounded-2xl bg-gray-100 text-gray-600 font-semibold text-sm hover:bg-gray-200 transition-colors"
+                className="flex items-center justify-center gap-1.5 py-3 px-4 rounded-2xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 title="Street View"
               >
                 <svg viewBox="0 0 24 24" className="w-4 h-4" fill="#F9A825">
@@ -159,7 +159,7 @@ export default function LocationCard({ location, currentUserId, onClose, onDelet
               {isOwner && (
                 <button
                   onClick={() => onDelete(location.id)}
-                  className="flex items-center justify-center w-12 h-12 rounded-2xl bg-red-50 text-red-400 hover:bg-red-100 hover:text-red-500 transition-colors"
+                  className="flex items-center justify-center w-12 h-12 rounded-2xl bg-red-50 dark:bg-red-900/20 text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-500 transition-colors"
                   title="Remove location"
                 >
                   <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">

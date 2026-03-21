@@ -52,7 +52,7 @@ export default function SearchBar({ onPlaceSelected }: SearchBarProps) {
   return (
     <div className="relative flex-1 max-w-sm">
       <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
       </div>
@@ -60,7 +60,7 @@ export default function SearchBar({ onPlaceSelected }: SearchBarProps) {
         ref={inputRef}
         type="text"
         placeholder="Search for a place to add…"
-        className="w-full pl-9 pr-4 py-2 rounded-xl bg-gray-100 border border-transparent focus:bg-white focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/30 text-sm text-gray-900 placeholder-gray-400 transition-all"
+        className="w-full pl-9 pr-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-700 border border-transparent dark:border-gray-600 focus:bg-white dark:focus:bg-gray-800 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/30 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all"
       />
     </div>
   )

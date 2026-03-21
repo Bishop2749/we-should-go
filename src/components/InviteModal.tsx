@@ -81,11 +81,11 @@ export default function InviteModal({ onClose }: Props) {
       onClick={handleOverlayClick}
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-4"
     >
-      <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-200">
+      <div className="w-full max-w-sm bg-white dark:bg-gray-900 rounded-3xl shadow-2xl dark:shadow-black/30 overflow-hidden animate-in slide-in-from-bottom-4 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-6 pb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -96,7 +96,7 @@ export default function InviteModal({ onClose }: Props) {
                 strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-emerald-600"
+                className="text-emerald-600 dark:text-emerald-400"
               >
                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                 <circle cx="9" cy="7" r="4" />
@@ -104,11 +104,11 @@ export default function InviteModal({ onClose }: Props) {
                 <line x1="22" y1="11" x2="16" y2="11" />
               </svg>
             </div>
-            <h2 className="font-bold text-gray-900 text-base">Invite a friend</h2>
+            <h2 className="font-bold text-gray-900 dark:text-white text-base">Invite a friend</h2>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
             aria-label="Close"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -122,21 +122,21 @@ export default function InviteModal({ onClose }: Props) {
           {/* Link field */}
           <div>
             {loadState === 'loading' && (
-              <div className="flex items-center gap-2 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200">
+              <div className="flex items-center gap-2 px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600">
                 <div className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin flex-shrink-0" />
-                <span className="text-sm text-gray-400">Generating your invite link…</span>
+                <span className="text-sm text-gray-400 dark:text-gray-500">Generating your invite link…</span>
               </div>
             )}
 
             {loadState === 'error' && (
-              <div className="px-4 py-3 bg-red-50 rounded-xl border border-red-100 text-sm text-red-600">
+              <div className="px-4 py-3 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-100 dark:border-red-800 text-sm text-red-600 dark:text-red-400">
                 Couldn&apos;t generate a link. Please try again.
               </div>
             )}
 
             {loadState === 'ready' && (
-              <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-50 rounded-xl border border-gray-200">
-                <span className="flex-1 text-xs text-gray-600 font-mono truncate">{inviteUrl}</span>
+              <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600">
+                <span className="flex-1 text-xs text-gray-600 dark:text-gray-300 font-mono truncate">{inviteUrl}</span>
               </div>
             )}
           </div>
@@ -149,16 +149,16 @@ export default function InviteModal({ onClose }: Props) {
                 onClick={handleCopy}
                 className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl border transition-all text-xs font-medium ${
                   copied
-                    ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                    : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'
+                    ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-700 text-emerald-700 dark:text-emerald-400'
+                    : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500'
                 }`}
               >
                 {copied ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-600 dark:text-emerald-400">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600 dark:text-gray-400">
                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
                     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                   </svg>
@@ -169,9 +169,9 @@ export default function InviteModal({ onClose }: Props) {
               {/* Email */}
               <button
                 onClick={handleEmail}
-                className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all text-xs font-medium"
+                className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500 transition-all text-xs font-medium"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600 dark:text-gray-400">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                   <polyline points="22,6 12,13 2,6" />
                 </svg>
@@ -181,9 +181,9 @@ export default function InviteModal({ onClose }: Props) {
               {/* Text/SMS */}
               <button
                 onClick={handleSms}
-                className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all text-xs font-medium"
+                className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500 transition-all text-xs font-medium"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600 dark:text-gray-400">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
                 Text
@@ -193,7 +193,7 @@ export default function InviteModal({ onClose }: Props) {
 
           {/* Expiry note */}
           {loadState === 'ready' && (
-            <p className="text-xs text-gray-400 text-center">
+            <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
               ⏳ Link expires in 7 days
             </p>
           )}

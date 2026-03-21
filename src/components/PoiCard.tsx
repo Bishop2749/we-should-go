@@ -56,27 +56,27 @@ export default function PoiCard({ placeId, lat, lng, onClose, onAdd, onCreateEve
 
       {/* Bottom sheet */}
       <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up">
-        <div className="bg-white rounded-t-3xl shadow-2xl mx-auto max-w-lg overflow-hidden">
+        <div className="bg-white dark:bg-gray-900 rounded-t-3xl shadow-2xl dark:shadow-black/30 mx-auto max-w-lg overflow-hidden">
           <div className="flex justify-center pt-3 pb-1">
-            <div className="w-10 h-1 bg-gray-200 rounded-full" />
+            <div className="w-10 h-1 bg-gray-200 dark:bg-gray-700 rounded-full" />
           </div>
 
           <div className="px-5 pt-3 pb-8">
             {loading ? (
               <div className="flex items-center gap-3 py-4">
                 <div className="w-5 h-5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
-                <span className="text-sm text-gray-400">Loading place info…</span>
+                <span className="text-sm text-gray-400 dark:text-gray-500">Loading place info…</span>
               </div>
             ) : info ? (
               <>
                 <div className="flex items-start justify-between gap-3 mb-4">
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-xl font-bold text-gray-900 leading-tight">{info.name}</h2>
-                    <p className="text-sm text-gray-400 mt-0.5">{info.address}</p>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{info.name}</h2>
+                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">{info.address}</p>
                   </div>
                   <button
                     onClick={onClose}
-                    className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200 transition-colors flex-shrink-0"
+                    className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex-shrink-0"
                   >
                     <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
                       <path d="M18 6 6 18M6 6l12 12"/>
@@ -87,7 +87,7 @@ export default function PoiCard({ placeId, lat, lng, onClose, onAdd, onCreateEve
                 <div className="flex gap-2.5">
                   {/* Add to We Should Go */}
                   {alreadySaved ? (
-                    <div className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-emerald-50 text-emerald-600 font-semibold text-sm">
+                    <div className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
                       <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
                         <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
                       </svg>
@@ -109,7 +109,7 @@ export default function PoiCard({ placeId, lat, lng, onClose, onAdd, onCreateEve
                   {onCreateEvent && (
                     <button
                       onClick={() => info && onCreateEvent(info)}
-                      className="flex items-center justify-center gap-1.5 py-3 px-4 rounded-2xl bg-indigo-50 text-indigo-600 font-semibold text-sm hover:bg-indigo-100 transition-colors"
+                      className="flex items-center justify-center gap-1.5 py-3 px-4 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-semibold text-sm hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors"
                       title="Create event here"
                     >
                       📅
@@ -121,7 +121,7 @@ export default function PoiCard({ placeId, lat, lng, onClose, onAdd, onCreateEve
                     href={info.googleMapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-1.5 py-3 px-4 rounded-2xl bg-gray-100 text-gray-600 font-semibold text-sm hover:bg-gray-200 transition-colors"
+                    className="flex items-center justify-center gap-1.5 py-3 px-4 rounded-2xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                   >
                     <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
                       <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
@@ -131,7 +131,7 @@ export default function PoiCard({ placeId, lat, lng, onClose, onAdd, onCreateEve
                 </div>
               </>
             ) : (
-              <p className="text-sm text-gray-400 py-4">Couldn't load place details.</p>
+              <p className="text-sm text-gray-400 dark:text-gray-500 py-4">Couldn&apos;t load place details.</p>
             )}
           </div>
         </div>
