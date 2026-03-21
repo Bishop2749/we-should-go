@@ -12,6 +12,7 @@ import SearchBar from '@/components/SearchBar'
 import InviteModal from '@/components/InviteModal'
 import CreateEventModal from '@/components/CreateEventModal'
 import ProfileModal from '@/components/ProfileModal'
+import FriendsPanel from '@/components/FriendsPanel'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -40,6 +41,7 @@ export default function MapPage() {
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [showCreateEventModal, setShowCreateEventModal] = useState(false)
   const [showProfileModal, setShowProfileModal] = useState(false)
+  const [showFriendsPanel, setShowFriendsPanel] = useState(false)
   const [pendingPlace, setPendingPlace] = useState<PlaceResult | null>(null)
   const [pendingEventPlace, setPendingEventPlace] = useState<PlaceResult | null>(null)
   const [loading, setLoading] = useState(true)
@@ -268,6 +270,30 @@ export default function MapPage() {
             </svg>
             <span className="hidden sm:block">Event</span>
           </button>
+
+          {/* Friends */}
+          <div className="relative">
+            <button
+              onClick={() => setShowFriendsPanel(v => !v)}
+              title="Friends"
+              className="flex items-center gap-1 text-xs text-gray-500 hover:text-emerald-600 font-medium transition-colors px-2 py-1.5 rounded-lg hover:bg-emerald-50"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+              <span className="hidden sm:block">Friends</span>
+            </button>
+            {showFriendsPanel && user && (
+              <FriendsPanel
+                currentUserId={user.id}
+                onClose={() => setShowFriendsPanel(false)}
+                onInvite={() => { setShowFriendsPanel(false); setShowInviteModal(true) }}
+              />
+            )}
+          </div>
 
           {/* Invite a friend button */}
           <button
