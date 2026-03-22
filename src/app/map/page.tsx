@@ -7,6 +7,7 @@ import type { User } from '@supabase/supabase-js'
 import { type Location, type Category, type LocationStatus } from '@/types'
 import type { Event, EventAttendee } from '@/types/events'
 import MapComponent from '@/components/Map'
+import FilterPanel, { type FilterState } from '@/components/FilterPanel'
 import AddLocationModal from '@/components/AddLocationModal'
 import SearchBar from '@/components/SearchBar'
 import InviteModal from '@/components/InviteModal'
@@ -47,8 +48,12 @@ export default function MapPage() {
   const [pendingEventPlace, setPendingEventPlace] = useState<PlaceResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [showNeonOverlay, setShowNeonOverlay] = useState(true)
-  const [neonNeighborhood, setNeonNeighborhood] = useState<string | null>(null)
-  const [neonCategory, setNeonCategory] = useState<string | null>(null)
+  const [showFilterPanel, setShowFilterPanel] = useState(false)
+  const [filters, setFilters] = useState<FilterState>({
+    neighborhoods: [],
+    categories: [],
+    show: 'all',
+  })
   const [showActivityFeed, setShowActivityFeed] = useState(false)
   const [userStatuses, setUserStatuses] = useState<Record<string, LocationStatus>>({})
 
@@ -285,6 +290,36 @@ export default function MapPage() {
             <span className="hidden sm:block">Neon</span>
           </button>
 
+          {/* Filters button */}
+          {(() => {
+            const activeFilterCount =
+              filters.neighborhoods.length +
+              filters.categories.length +
+              (filters.show !== 'all' ? 1 : 0)
+            return (
+              <button
+                onClick={() => setShowFilterPanel(true)}
+                className={`flex items-center gap-1.5 text-xs font-medium transition-colors px-2 py-1.5 rounded-lg ${
+                  activeFilterCount > 0
+                    ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20'
+                    : 'text-gray-600 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
+                }`}
+              >
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <line x1="4" y1="6" x2="20" y2="6"/>
+                  <line x1="8" y1="12" x2="16" y2="12"/>
+                  <line x1="11" y1="18" x2="13" y2="18"/>
+                </svg>
+                <span className="hidden sm:block">Filters</span>
+                {activeFilterCount > 0 && (
+                  <span className="w-4 h-4 rounded-full bg-emerald-500 text-white text-xs flex items-center justify-center font-bold leading-none">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
+            )
+          })()}
+
           {/* Calendar */}
           <Link
             href="/calendar"
@@ -421,51 +456,8 @@ export default function MapPage() {
               setShowCreateEventModal(true)
             }}
             showNeonOverlay={showNeonOverlay}
-            neonFilters={{ neighborhood: neonNeighborhood, category: neonCategory }}
+            filters={filters}
           />
-
-          {/* Neon filter bar — shown when overlay is active */}
-          {showNeonOverlay && (
-            <div className="absolute top-0 left-0 right-0 z-30 px-3 py-2 flex gap-2 overflow-x-auto no-scrollbar pointer-events-none">
-              <div className="flex gap-1.5 pointer-events-auto">
-                {['All', 'Koreatown', 'Downtown', 'Hollywood', 'NoHo', 'Miracle Mile'].map(n => (
-                  <button
-                    key={n}
-                    onClick={() => setNeonNeighborhood(n === 'All' ? null : n)}
-                    className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition-all shadow-sm ${
-                      (n === 'All' ? !neonNeighborhood : neonNeighborhood === n)
-                        ? 'bg-amber-500 text-white shadow-amber-200'
-                        : 'bg-white/90 dark:bg-gray-800/90 backdrop-blur text-gray-700 dark:text-gray-300 hover:bg-amber-50'
-                    }`}
-                  >
-                    {n}
-                  </button>
-                ))}
-              </div>
-              <div className="w-px bg-gray-200 dark:bg-gray-600 flex-shrink-0 self-stretch mx-1" />
-              <div className="flex gap-1.5 pointer-events-auto">
-                {[
-                  { label: 'All', value: null },
-                  { label: '🍽️ Food', value: 'restaurant' },
-                  { label: '🍺 Bars', value: 'bar' },
-                  { label: '🎯 Activities', value: 'activity' },
-                  { label: '🎉 Events', value: 'event' },
-                ].map(c => (
-                  <button
-                    key={c.label}
-                    onClick={() => setNeonCategory(c.value)}
-                    className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition-all shadow-sm ${
-                      neonCategory === c.value
-                        ? 'bg-amber-500 text-white shadow-amber-200'
-                        : 'bg-white/90 dark:bg-gray-800/90 backdrop-blur text-gray-700 dark:text-gray-300 hover:bg-amber-50'
-                    }`}
-                  >
-                    {c.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Category legend */}
           <div className="absolute bottom-6 left-4 sm:left-6 z-10">
@@ -530,6 +522,15 @@ export default function MapPage() {
             <ActivityFeed
               currentUserId={user.id}
               onClose={() => setShowActivityFeed(false)}
+            />
+          )}
+
+          {/* Filter Panel */}
+          {showFilterPanel && (
+            <FilterPanel
+              filters={filters}
+              onChange={setFilters}
+              onClose={() => setShowFilterPanel(false)}
             />
           )}
       </div>

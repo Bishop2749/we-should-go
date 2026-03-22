@@ -11,6 +11,7 @@ import type { Event, EventAttendee } from '@/types/events'
 import LocationCard from './LocationCard'
 import PoiCard from './PoiCard'
 import EventCard from './EventCard'
+import type { FilterState } from './FilterPanel'
 
 const DARK_MAP_STYLES: google.maps.MapTypeStyle[] = [
   { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
@@ -203,7 +204,7 @@ interface MapProps {
   onAddFromPoi: (place: { name: string; address: string; lat: number; lng: number; placeId: string; googleMapsUrl: string }) => void
   onCreateEventFromPoi?: (place: { name: string; address: string; lat: number; lng: number; placeId: string; googleMapsUrl: string }) => void
   showNeonOverlay: boolean
-  neonFilters: { neighborhood: string | null; category: string | null }
+  filters: FilterState
 }
 
 function StatusBadge({ status }: { status: 'want_to_go' | 'been_here' }) {
@@ -279,7 +280,7 @@ export default function MapComponent({
   onAddFromPoi,
   onCreateEventFromPoi,
   showNeonOverlay,
-  neonFilters,
+  filters,
 }: MapProps) {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
   const [selectedPoi, setSelectedPoi] = useState<PoiClick | null>(null)
@@ -332,9 +333,24 @@ export default function MapComponent({
 
   const visibleLocations = locations.filter(loc => {
     const isNeon = loc.added_by === NEON_USER_ID
+
+    // Show/hide toggle for Neon layer
     if (isNeon && !showNeonOverlay) return false
-    if (isNeon && neonFilters.neighborhood && loc.neighborhood !== neonFilters.neighborhood) return false
-    if (isNeon && neonFilters.category && loc.category !== neonFilters.category) return false
+
+    // "show" filter
+    if (filters.show === 'neon' && !isNeon) return false
+    if (filters.show === 'user' && isNeon) return false
+
+    // Neighborhood filter (applies to all pins)
+    if (filters.neighborhoods.length > 0 && loc.neighborhood) {
+      if (!filters.neighborhoods.includes(loc.neighborhood)) return false
+    }
+
+    // Category filter (applies to all pins)
+    if (filters.categories.length > 0) {
+      if (!filters.categories.includes(loc.category)) return false
+    }
+
     return true
   })
 
