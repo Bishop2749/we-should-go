@@ -524,6 +524,14 @@ export default function MapPage() {
               onClose={() => setShowProfileModal(false)}
             />
           )}
+
+          {/* Activity Feed */}
+          {showActivityFeed && user && (
+            <ActivityFeed
+              currentUserId={user.id}
+              onClose={() => setShowActivityFeed(false)}
+            />
+          )}
       </div>
     </div>
     </APIProvider>
