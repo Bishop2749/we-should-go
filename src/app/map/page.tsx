@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { APIProvider } from '@vis.gl/react-google-maps'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
-import { type Location, type Category } from '@/types'
+import { type Location, type Category, type LocationStatus } from '@/types'
 import type { Event, EventAttendee } from '@/types/events'
 import MapComponent from '@/components/Map'
 import AddLocationModal from '@/components/AddLocationModal'
@@ -13,6 +13,7 @@ import InviteModal from '@/components/InviteModal'
 import CreateEventModal from '@/components/CreateEventModal'
 import ProfileModal from '@/components/ProfileModal'
 import FriendsPanel from '@/components/FriendsPanel'
+import ActivityFeed from '@/components/ActivityFeed'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -48,6 +49,8 @@ export default function MapPage() {
   const [showNeonOverlay, setShowNeonOverlay] = useState(true)
   const [neonNeighborhood, setNeonNeighborhood] = useState<string | null>(null)
   const [neonCategory, setNeonCategory] = useState<string | null>(null)
+  const [showActivityFeed, setShowActivityFeed] = useState(false)
+  const [userStatuses, setUserStatuses] = useState<Record<string, LocationStatus>>({})
 
   const handlePlaceSelected = useCallback((place: PlaceResult) => {
     setPendingPlace(place)
@@ -76,6 +79,24 @@ export default function MapPage() {
 
       if (!locationError && locationData) {
         setLocations(locationData as Location[])
+      }
+
+      // Load user's location statuses (graceful degradation if table doesn't exist)
+      try {
+        const { data: statusData } = await supabase
+          .from('location_user_status')
+          .select('location_id, status')
+          .eq('user_id', user.id)
+
+        if (statusData) {
+          const statusMap: Record<string, LocationStatus> = {}
+          for (const s of statusData as { location_id: string; status: LocationStatus }[]) {
+            statusMap[s.location_id] = s.status
+          }
+          setUserStatuses(statusMap)
+        }
+      } catch {
+        // Table may not exist yet
       }
 
       // Load events (public + mine + invited)
@@ -238,7 +259,7 @@ export default function MapPage() {
     >
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="flex-shrink-0 h-14 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 shadow-sm flex items-center gap-3 px-4 z-20">
+      <header className="flex-shrink-0 h-14 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-white/20 dark:border-gray-700/50 shadow-sm flex items-center gap-3 px-4 z-20">
         {/* Logo */}
         <div className="flex items-center gap-1.5 flex-shrink-0">
           <span className="text-xl">📍</span>
@@ -286,6 +307,23 @@ export default function MapPage() {
               <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="20"/><line x1="9" y1="17" x2="15" y2="17"/>
             </svg>
             <span className="hidden sm:block">Event</span>
+          </button>
+
+          {/* Activity Feed */}
+          <button
+            onClick={() => setShowActivityFeed(v => !v)}
+            title="Recent Activity"
+            className={`flex items-center gap-1 text-xs font-medium transition-colors px-2 py-1.5 rounded-lg ${
+              showActivityFeed
+                ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20'
+                : 'text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
+            }`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            <span className="hidden sm:block">Activity</span>
           </button>
 
           {/* Friends */}
@@ -372,6 +410,7 @@ export default function MapPage() {
             locations={locations}
             events={events}
             currentUserId={user?.id ?? null}
+            userStatuses={userStatuses}
             onDeleteLocation={handleDeleteLocation}
             onAddFromPoi={(place) => {
               setPendingPlace({ ...place, placeId: place.placeId })
@@ -387,30 +426,44 @@ export default function MapPage() {
 
           {/* Neon filter bar — shown when overlay is active */}
           {showNeonOverlay && (
-            <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
-              <select
-                value={neonNeighborhood ?? ''}
-                onChange={e => setNeonNeighborhood(e.target.value || null)}
-                className="text-xs bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-amber-200 dark:border-amber-700 text-gray-700 dark:text-gray-200 rounded-xl px-3 py-2 shadow-md focus:outline-none focus:ring-2 focus:ring-amber-300 cursor-pointer"
-              >
-                <option value="">All neighborhoods</option>
-                <option value="Koreatown">Koreatown</option>
-                <option value="Downtown">Downtown</option>
-                <option value="Hollywood">Hollywood</option>
-                <option value="NoHo">NoHo</option>
-                <option value="Miracle Mile">Miracle Mile</option>
-              </select>
-              <select
-                value={neonCategory ?? ''}
-                onChange={e => setNeonCategory(e.target.value || null)}
-                className="text-xs bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-amber-200 dark:border-amber-700 text-gray-700 dark:text-gray-200 rounded-xl px-3 py-2 shadow-md focus:outline-none focus:ring-2 focus:ring-amber-300 cursor-pointer"
-              >
-                <option value="">All categories</option>
-                <option value="restaurant">Restaurant</option>
-                <option value="bar">Bar</option>
-                <option value="activity">Activity</option>
-                <option value="event">Event</option>
-              </select>
+            <div className="absolute top-0 left-0 right-0 z-30 px-3 py-2 flex gap-2 overflow-x-auto no-scrollbar pointer-events-none">
+              <div className="flex gap-1.5 pointer-events-auto">
+                {['All', 'Koreatown', 'Downtown', 'Hollywood', 'NoHo', 'Miracle Mile'].map(n => (
+                  <button
+                    key={n}
+                    onClick={() => setNeonNeighborhood(n === 'All' ? null : n)}
+                    className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition-all shadow-sm ${
+                      (n === 'All' ? !neonNeighborhood : neonNeighborhood === n)
+                        ? 'bg-amber-500 text-white shadow-amber-200'
+                        : 'bg-white/90 dark:bg-gray-800/90 backdrop-blur text-gray-700 dark:text-gray-300 hover:bg-amber-50'
+                    }`}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+              <div className="w-px bg-gray-200 dark:bg-gray-600 flex-shrink-0 self-stretch mx-1" />
+              <div className="flex gap-1.5 pointer-events-auto">
+                {[
+                  { label: 'All', value: null },
+                  { label: '🍽️ Food', value: 'restaurant' },
+                  { label: '🍺 Bars', value: 'bar' },
+                  { label: '🎯 Activities', value: 'activity' },
+                  { label: '🎉 Events', value: 'event' },
+                ].map(c => (
+                  <button
+                    key={c.label}
+                    onClick={() => setNeonCategory(c.value)}
+                    className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition-all shadow-sm ${
+                      neonCategory === c.value
+                        ? 'bg-amber-500 text-white shadow-amber-200'
+                        : 'bg-white/90 dark:bg-gray-800/90 backdrop-blur text-gray-700 dark:text-gray-300 hover:bg-amber-50'
+                    }`}
+                  >
+                    {c.label}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 

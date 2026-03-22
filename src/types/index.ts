@@ -1,3 +1,22 @@
+export type LocationStatus = 'want_to_go' | 'been_here' | null
+export type ReactionType = 'fire' | 'check' | 'hundred'
+
+export interface PinReaction {
+  id: string
+  location_id: string
+  user_id: string
+  reaction: ReactionType
+  created_at: string
+}
+
+export interface LocationUserStatus {
+  id: string
+  location_id: string
+  user_id: string
+  status: 'want_to_go' | 'been_here'
+  created_at: string
+}
+
 export interface Location {
   id: string
   created_at: string

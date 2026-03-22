@@ -96,3 +96,30 @@ body,
 .animate-slide-up {
   animation: slide-up 0.25s cubic-bezier(0.32, 0.72, 0, 1);
 }
+
+@keyframes neon-pulse {
+  0%, 100% { box-shadow: 0 2px 12px rgba(245,158,11,0.6); }
+  50% { box-shadow: 0 2px 20px rgba(245,158,11,0.9), 0 0 30px rgba(245,158,11,0.3); }
+}
+.neon-pin-inner {
+  animation: neon-pulse 2.5s ease-in-out infinite;
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(4px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 0.15s ease-out;
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+.animate-slide-in-right {
+  animation: slide-in-right 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+}

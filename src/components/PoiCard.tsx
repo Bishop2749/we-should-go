@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useMapsLibrary } from '@vis.gl/react-google-maps'
 
 interface PoiInfo {
@@ -26,6 +26,19 @@ export default function PoiCard({ placeId, lat, lng, onClose, onAdd, onCreateEve
   const placesLib = useMapsLibrary('places')
   const [info, setInfo] = useState<PoiInfo | null>(null)
   const [loading, setLoading] = useState(true)
+
+  const [dragY, setDragY] = useState(0)
+  const startY = useRef(0)
+
+  const onTouchStart = (e: React.TouchEvent) => { startY.current = e.touches[0].clientY }
+  const onTouchMove = (e: React.TouchEvent) => {
+    const delta = e.touches[0].clientY - startY.current
+    if (delta > 0) setDragY(delta)
+  }
+  const onTouchEnd = () => {
+    if (dragY > 80) onClose()
+    else setDragY(0)
+  }
 
   useEffect(() => {
     if (!placesLib) return
@@ -55,7 +68,16 @@ export default function PoiCard({ placeId, lat, lng, onClose, onAdd, onCreateEve
       <div className="fixed inset-0 z-40" onClick={onClose} />
 
       {/* Bottom sheet */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up">
+      <div
+        className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up"
+        style={{
+          transform: `translateY(${dragY}px)`,
+          transition: dragY === 0 ? 'transform 0.2s' : 'none',
+        }}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         <div className="bg-white dark:bg-gray-900 rounded-t-3xl shadow-2xl dark:shadow-black/30 mx-auto max-w-lg overflow-hidden">
           <div className="flex justify-center pt-3 pb-1">
             <div className="w-10 h-1 bg-gray-200 dark:bg-gray-700 rounded-full" />

@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useRef } from 'react'
 import { type Location, getCategoryMeta, NEON_USER_ID } from '@/types'
 
 interface LocationCardProps {
@@ -17,6 +18,32 @@ export default function LocationCard({ location, currentUserId, onClose, onDelet
     month: 'short', day: 'numeric', year: 'numeric'
   })
 
+  const [dragY, setDragY] = useState(0)
+  const startY = useRef(0)
+  const [copied, setCopied] = useState(false)
+
+  const onTouchStart = (e: React.TouchEvent) => { startY.current = e.touches[0].clientY }
+  const onTouchMove = (e: React.TouchEvent) => {
+    const delta = e.touches[0].clientY - startY.current
+    if (delta > 0) setDragY(delta)
+  }
+  const onTouchEnd = () => {
+    if (dragY > 80) onClose()
+    else setDragY(0)
+  }
+
+  const handleShare = async () => {
+    const text = `We should go to ${location.name}! 📍`
+    const url = location.google_maps_url || `https://www.google.com/maps/place/?q=place_id:${location.place_id ?? ''}`
+    if (navigator.share) {
+      await navigator.share({ title: location.name, text, url })
+    } else {
+      await navigator.clipboard.writeText(`${text} ${url}`)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
   return (
     <>
       {/* Backdrop */}
@@ -26,7 +53,16 @@ export default function LocationCard({ location, currentUserId, onClose, onDelet
       />
 
       {/* Bottom sheet */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up">
+      <div
+        className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up"
+        style={{
+          transform: `translateY(${dragY}px)`,
+          transition: dragY === 0 ? 'transform 0.2s' : 'none',
+        }}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         {/* Sheet */}
         <div className="bg-white dark:bg-gray-900 rounded-t-3xl shadow-2xl dark:shadow-black/30 mx-auto max-w-lg overflow-hidden">
           {/* Drag handle */}
@@ -128,7 +164,7 @@ export default function LocationCard({ location, currentUserId, onClose, onDelet
             <div className="flex gap-2.5">
               {/* Open in Google Maps — primary */}
               <a
-                href={location.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location.name)}&query_place_id=${location.place_id}`}
+                href={location.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location.name)}&query_place_id=${location.place_id ?? ''}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl text-white font-semibold text-sm transition-opacity hover:opacity-90 active:opacity-80"
@@ -138,6 +174,19 @@ export default function LocationCard({ location, currentUserId, onClose, onDelet
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                 </svg>
                 Open in Maps
+              </a>
+
+              {/* Directions */}
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(location.address || location.name)}&destination_place_id=${location.place_id ?? ''}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-1.5 py-3 px-4 rounded-2xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              >
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
+                  <path d="M21.71 11.29l-9-9a1 1 0 0 0-1.42 0l-9 9a1 1 0 0 0 0 1.42l9 9a1 1 0 0 0 1.42 0l9-9a1 1 0 0 0 0-1.42zM14 14.5V12h-4v3H8v-4a1 1 0 0 1 1-1h5V7.5l3.5 3.5-3.5 3.5z"/>
+                </svg>
+                Directions
               </a>
 
               {/* Street View */}
@@ -166,6 +215,21 @@ export default function LocationCard({ location, currentUserId, onClose, onDelet
                     <path d="M3 6h18M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/>
                   </svg>
                 </button>
+              )}
+            </div>
+
+            {/* We Should Go! share button */}
+            <div className="relative mt-1">
+              <button
+                onClick={handleShare}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm transition-colors"
+              >
+                📍 We Should Go!
+              </button>
+              {copied && (
+                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-lg animate-fade-in whitespace-nowrap">
+                  Copied link!
+                </div>
               )}
             </div>
           </div>

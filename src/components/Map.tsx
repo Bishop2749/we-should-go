@@ -6,7 +6,7 @@ import {
   AdvancedMarker,
   useMap,
 } from '@vis.gl/react-google-maps'
-import { type Location, getCategoryMeta, NEON_USER_ID } from '@/types'
+import { type Location, getCategoryMeta, NEON_USER_ID, type LocationStatus } from '@/types'
 import type { Event, EventAttendee } from '@/types/events'
 import LocationCard from './LocationCard'
 import PoiCard from './PoiCard'
@@ -198,6 +198,7 @@ interface MapProps {
   locations: Location[]
   events: EventWithMeta[]
   currentUserId: string | null
+  userStatuses?: Record<string, LocationStatus>
   onDeleteLocation: (id: string) => void
   onAddFromPoi: (place: { name: string; address: string; lat: number; lng: number; placeId: string; googleMapsUrl: string }) => void
   onCreateEventFromPoi?: (place: { name: string; address: string; lat: number; lng: number; placeId: string; googleMapsUrl: string }) => void
@@ -205,49 +206,58 @@ interface MapProps {
   neonFilters: { neighborhood: string | null; category: string | null }
 }
 
-/** Distinctive Neon pin — gold/amber gradient with sparkle */
-function NeonPin() {
+function StatusBadge({ status }: { status: 'want_to_go' | 'been_here' }) {
   return (
     <div
       style={{
-        width: 40,
-        height: 40,
+        position: 'absolute',
+        bottom: 6,
+        right: -4,
+        width: 16,
+        height: 16,
         borderRadius: '50%',
-        background: 'linear-gradient(135deg, #F59E0B, #EF4444)',
-        border: '2.5px solid white',
-        boxShadow: '0 2px 8px rgba(245,158,11,0.5)',
+        background: status === 'been_here' ? '#10b981' : '#f59e0b',
+        border: '2px solid white',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        cursor: 'pointer',
+        fontSize: 8,
+        lineHeight: 1,
+        zIndex: 2,
       }}
     >
-      <span style={{ fontSize: 18, lineHeight: 1 }}>✨</span>
+      {status === 'been_here' ? '✓' : '🔖'}
     </div>
   )
 }
 
-function CategoryPin({ category }: { category: string }) {
-  const meta = getCategoryMeta(category)
+function CategoryPin({ emoji, color, isNeon = false, status }: { emoji: string; color: string; isNeon?: boolean; status?: LocationStatus }) {
   return (
-    <div
-      style={{
-        width: 36,
-        height: 36,
-        borderRadius: '50% 50% 50% 0',
-        transform: 'rotate(-45deg)',
-        backgroundColor: meta.color,
-        border: '2.5px solid white',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        cursor: 'pointer',
-      }}
-    >
-      <span style={{ transform: 'rotate(45deg)', display: 'block', fontSize: 16, lineHeight: 1 }}>
-        {meta.emoji}
-      </span>
+    <div style={{ width: 44, height: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', position: 'relative' }}>
+      <div
+        className={isNeon ? 'neon-pin-inner' : undefined}
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: '50% 50% 50% 0',
+          transform: 'rotate(-45deg)',
+          background: isNeon
+            ? 'linear-gradient(135deg, #F59E0B, #EF4444)'
+            : color,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: isNeon
+            ? '0 2px 12px rgba(245,158,11,0.6)'
+            : '0 2px 8px rgba(0,0,0,0.25)',
+          border: '2px solid rgba(255,255,255,0.9)',
+        }}
+      >
+        <span style={{ transform: 'rotate(45deg)', fontSize: 16, lineHeight: 1 }}>{emoji}</span>
+      </div>
+      {/* Pin tip shadow */}
+      <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgba(0,0,0,0.15)', marginTop: 1, filter: 'blur(2px)' }} />
+      {status && <StatusBadge status={status} />}
     </div>
   )
 }
@@ -264,6 +274,7 @@ export default function MapComponent({
   locations,
   events,
   currentUserId,
+  userStatuses = {},
   onDeleteLocation,
   onAddFromPoi,
   onCreateEventFromPoi,
@@ -350,21 +361,26 @@ export default function MapComponent({
         <MapControls />
 
         {/* Location pins */}
-        {visibleLocations.map((loc) => (
-          <AdvancedMarker
-            key={loc.id}
-            position={{ lat: loc.lat, lng: loc.lng }}
-            onClick={() => handleMarkerClick(loc)}
-            title={loc.name}
-            zIndex={loc.added_by === NEON_USER_ID ? 5 : 1}
-          >
-            {loc.added_by === NEON_USER_ID ? (
-              <NeonPin />
-            ) : (
-              <CategoryPin category={loc.category} />
-            )}
-          </AdvancedMarker>
-        ))}
+        {visibleLocations.map((loc) => {
+          const isNeon = loc.added_by === NEON_USER_ID
+          const meta = getCategoryMeta(loc.category)
+          const locStatus = userStatuses[loc.id] ?? undefined
+          return (
+            <AdvancedMarker
+              key={loc.id}
+              position={{ lat: loc.lat, lng: loc.lng }}
+              onClick={() => handleMarkerClick(loc)}
+              title={loc.name}
+              zIndex={isNeon ? 5 : 1}
+            >
+              {isNeon ? (
+                <CategoryPin emoji="✨" color="" isNeon={true} />
+              ) : (
+                <CategoryPin emoji={meta.emoji} color={meta.color} status={locStatus} />
+              )}
+            </AdvancedMarker>
+          )
+        })}
 
         {/* Event pins — distinct purple/indigo style */}
         {events.map((evt) => (
@@ -380,6 +396,19 @@ export default function MapComponent({
         ))}
 
       </GoogleMap>
+
+      {/* Empty state — shown when no user-saved locations */}
+      {locations.filter(l => l.added_by !== NEON_USER_ID).length === 0 && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+          <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur rounded-2xl shadow-lg px-6 py-5 text-center max-w-xs pointer-events-auto mx-4">
+            <div className="text-4xl mb-3">📍</div>
+            <h3 className="font-bold text-gray-900 dark:text-white text-base mb-1">No spots saved yet</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+              Tap any place on the map or use the search bar to save your first spot.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Saved location card */}
       {selectedLocation && (
