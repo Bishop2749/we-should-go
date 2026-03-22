@@ -277,7 +277,7 @@ export default function MapPage() {
             className={`flex items-center gap-1 text-xs font-medium transition-colors px-2 py-1.5 rounded-lg ${
               showNeonOverlay
                 ? 'text-amber-600 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30'
-                : 'text-gray-500 dark:text-gray-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20'
+                : 'text-gray-500 dark:text-gray-200 hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20'
             }`}
             title="Neon city guide"
           >
@@ -289,7 +289,7 @@ export default function MapPage() {
           <Link
             href="/calendar"
             title="My Calendar"
-            className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors px-2 py-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+            className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-200 hover:text-indigo-400 dark:hover:text-indigo-400 font-medium transition-colors px-2 py-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
@@ -301,7 +301,7 @@ export default function MapPage() {
           <button
             onClick={() => { setPendingEventPlace(null); setShowCreateEventModal(true) }}
             title="Create an event"
-            className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors px-2 py-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+            className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-200 hover:text-indigo-400 dark:hover:text-indigo-400 font-medium transition-colors px-2 py-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="20"/><line x1="9" y1="17" x2="15" y2="17"/>
@@ -316,7 +316,7 @@ export default function MapPage() {
             className={`flex items-center gap-1 text-xs font-medium transition-colors px-2 py-1.5 rounded-lg ${
               showActivityFeed
                 ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20'
-                : 'text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
+                : 'text-gray-500 dark:text-gray-200 hover:text-emerald-400 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
             }`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -331,7 +331,7 @@ export default function MapPage() {
             <button
               onClick={() => setShowFriendsPanel(v => !v)}
               title="Friends"
-              className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium transition-colors px-2 py-1.5 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+              className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-200 hover:text-emerald-400 dark:hover:text-emerald-400 font-medium transition-colors px-2 py-1.5 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -354,7 +354,7 @@ export default function MapPage() {
           <button
             onClick={() => setShowInviteModal(true)}
             title="Invite a friend"
-            className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium transition-colors px-2 py-1.5 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+            className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-200 hover:text-emerald-400 dark:hover:text-emerald-400 font-medium transition-colors px-2 py-1.5 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -397,7 +397,7 @@ export default function MapPage() {
 
           <button
             onClick={handleSignOut}
-            className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 font-medium transition-colors px-2 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 hidden sm:block"
+            className="text-xs text-gray-400 dark:text-gray-300 hover:text-gray-600 dark:hover:text-gray-100 font-medium transition-colors px-2 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 hidden sm:block"
           >
             Sign out
           </button>
