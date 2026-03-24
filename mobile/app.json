@@ -1,43 +1,6 @@
 {
   "expo": {
     "name": "We Should Go",
-    "slug": "we-should-go",
-    "scheme": "weshouldgo",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "ios": {
-      "supportsTablet": false,
-      "bundleIdentifier": "com.weshouldgo.app",
-      "config": {
-        "googleMapsApiKey": "REDACTED-ROTATED-KEY"
-      }
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundColor": "#ffffff"
-      },
-      "package": "com.weshouldgo.app",
-      "config": {
-        "googleMaps": {
-          "apiKey": "REDACTED-ROTATED-KEY"
-        }
-      }
-    },
-    "web": {
-      "bundler": "metro"
-    },
-    "plugins": [
-      "expo-router",
-      [
-        "expo-location",
-        {
-          "locationWhenInUsePermission": "We Should Go uses your location to show you nearby places."
-        }
-      ]
-    ]
+    "slug": "we-should-go"
   }
 }
