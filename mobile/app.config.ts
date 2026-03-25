@@ -18,6 +18,16 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     config: {
       googleMapsApiKey: GOOGLE_MAPS_KEY,
     },
+    infoPlist: {
+      NSHealthShareUsageDescription:
+        'Bishop uses your health records to help you track medications, appointments, and lab results.',
+      NSHealthUpdateUsageDescription:
+        'Bishop may write health data to help track your wellness.',
+    },
+    entitlements: {
+      'com.apple.developer.healthkit': true,
+      'com.apple.developer.healthkit.access': ['health-records'],
+    },
   },
   android: {
     adaptiveIcon: {
@@ -41,5 +51,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           'We Should Go uses your location to show you nearby places.',
       },
     ],
+    ['@kingstinct/react-native-healthkit', {}],
   ],
 })
