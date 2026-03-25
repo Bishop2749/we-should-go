@@ -32,6 +32,7 @@ export default function RootLayout() {
         <Tabs.Screen
           name="health"
           options={{
+            href: null,
             title: 'Health',
             tabBarLabel: 'Health',
             tabBarIcon: () => <Text style={{ fontSize: 20 }}>🏥</Text>,
