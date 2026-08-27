@@ -117,6 +117,8 @@ npx expo start
 
 `/demo` reuses the real `Map` component against the real database — it isn't a separate mock. What makes it safe to expose without a login is entirely in Postgres: `supabase/demo-mode.sql` grants the `anon` role narrowly-scoped `SELECT` policies — curated pins owned by one synthetic "curator" account, plus events, RSVPs, and reactions belonging to a fixed set of mock user IDs. No policy uses `using (true)`; every one names the exact rows it allows. A real user's saved pins, friendships, and events stay invisible to `anon` regardless of what else changes in the schema. `supabase/demo-seed.sql` populates that synthetic content and is idempotent.
 
+The project runs on Supabase's free tier, which pauses a project after about a week of no API traffic — a daily cron job pings the REST endpoint (anon key, read-only) to keep it awake, logging each result and raising a notification on failure.
+
 ## Notes
 
 `mobile/` is excluded from the web build via `.vercelignore` and from type-checking via `tsconfig.json`; it's a separate app that happens to live in the same repo.
