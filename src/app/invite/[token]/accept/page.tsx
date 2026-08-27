@@ -5,6 +5,11 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
+/** Shape returned by the accept_invite() Postgres function. */
+type AcceptResult =
+  | { status: 'success' | 'already_friends'; friend_name: string }
+  | { status: 'error'; reason: string }
+
 type State =
   | { status: 'loading' }
   | { status: 'success'; friendName: string }
@@ -32,70 +37,44 @@ export default function AcceptInvitePage() {
         return
       }
 
-      // 2. Load the invite
-      const { data: invite, error: inviteError } = await supabase
-        .from('invites')
-        .select('id, token, created_by, created_by_name, used_by, expires_at')
-        .eq('token', token)
-        .single()
+      // 2. Accept it. Validation, creating the friendship and marking the
+      //    invite used all happen in one transaction server-side, so two
+      //    people racing on the same token can't both succeed.
+      //    See supabase/invites-migration.sql.
+      const { data, error: rpcError } = await supabase
+        .rpc('accept_invite', { invite_token: token })
 
-      if (inviteError || !invite) {
-        if (!cancelled) setState({ status: 'error', message: "We couldn't find this invite. It may have been revoked." })
+      const result = data as AcceptResult | null
+
+      if (rpcError || !result) {
+        console.error('accept_invite failed:', rpcError)
+        if (!cancelled) setState({ status: 'error', message: 'Something went wrong accepting this invite. Please try again.' })
         return
       }
 
-      // 3. Guard: expired or already used
-      if (new Date(invite.expires_at) < new Date()) {
-        if (!cancelled) setState({ status: 'error', message: 'This invite has expired. Ask your friend to send a new one.' })
+      if (result.status === 'error') {
+        const messages: Record<string, string> = {
+          not_found: "We couldn't find this invite. It may have been revoked.",
+          expired: 'This invite has expired. Ask your friend to send a new one.',
+          already_used: 'This invite has already been accepted by someone else.',
+          own_invite: "You can't accept your own invite — share it with a friend instead!",
+          not_signed_in: 'Please sign in to accept this invite.',
+        }
+        if (!cancelled) {
+          setState({
+            status: 'error',
+            message: messages[result.reason] ?? 'This invite could not be accepted.',
+          })
+        }
         return
       }
 
-      if (invite.used_by && invite.used_by !== user.id) {
-        if (!cancelled) setState({ status: 'error', message: 'This invite has already been accepted by someone else.' })
-        return
+      if (!cancelled) {
+        setState({
+          status: result.status === 'already_friends' ? 'already_friends' : 'success',
+          friendName: result.friend_name,
+        })
       }
-
-      // 4. Don't let someone accept their own invite
-      if (invite.created_by === user.id) {
-        if (!cancelled) setState({ status: 'error', message: "You can't accept your own invite — share it with a friend instead!" })
-        return
-      }
-
-      // 5. Build canonical (user_a, user_b) ordering
-      const [user_a, user_b] = [user.id, invite.created_by].sort()
-
-      // 6. Check if friendship already exists
-      const { data: existing } = await supabase
-        .from('friendships')
-        .select('id')
-        .eq('user_a', user_a)
-        .eq('user_b', user_b)
-        .maybeSingle()
-
-      if (existing) {
-        if (!cancelled) setState({ status: 'already_friends', friendName: invite.created_by_name })
-        return
-      }
-
-      // 7. Create friendship
-      const { error: friendshipError } = await supabase
-        .from('friendships')
-        .insert({ user_a, user_b })
-
-      if (friendshipError) {
-        console.error('Friendship insert error:', friendshipError)
-        if (!cancelled) setState({ status: 'error', message: 'Something went wrong creating the friendship. Please try again.' })
-        return
-      }
-
-      // 8. Mark invite as used
-      await supabase
-        .from('invites')
-        .update({ used_by: user.id, used_at: new Date().toISOString() })
-        .eq('token', token)
-      // Non-fatal if this fails — friendship is already created
-
-      if (!cancelled) setState({ status: 'success', friendName: invite.created_by_name })
     }
 
     accept()

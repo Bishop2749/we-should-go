@@ -47,7 +47,7 @@ begin
      'The Normandie Club', '3612 W 6th St, Los Angeles, CA 90020, USA',
      34.0634563, -118.3008976, 'ChIJCUNzt4K4woAR-z4MIi0ONo4',
      'https://maps.google.com/?place_id=ChIJCUNzt4K4woAR-z4MIi0ONo4',
-     '2026-09-19 20:00:00-07', null,
+     '2026-09-18 20:00:00-07', null,
      v_taylor, 'Taylor Brooks', 'public')
   on conflict (id) do nothing;
 

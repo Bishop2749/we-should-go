@@ -80,16 +80,18 @@ export default function ReactionBar({ locationId, currentUserId }: ReactionBarPr
 
   if (loading) return null
 
-  const total = counts.fire + counts.check + counts.hundred
-  // Signed out and nothing to show: no reactions exist and no way to add one.
-  if (!currentUserId && total === 0) return null
+  const interactive = !!currentUserId
+
+  // Signed in, every chip is an affordance worth showing. Signed out, a chip
+  // is only a tally — so an empty one says nothing and can't be clicked.
+  const visible = interactive ? REACTIONS : REACTIONS.filter((r) => counts[r.type] > 0)
+  if (visible.length === 0) return null
 
   return (
     <div className="flex items-center gap-2 mb-4">
-      {REACTIONS.map((r) => {
+      {visible.map((r) => {
         const count = counts[r.type]
         const active = myReaction === r.type
-        const interactive = !!currentUserId
 
         return (
           <button

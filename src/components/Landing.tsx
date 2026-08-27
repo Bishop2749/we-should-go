@@ -54,7 +54,7 @@ export default function Landing() {
             Sign in
           </Link>
         </div>
-        <p className="mt-4 text-sm text-gray-400 dark:text-gray-500">
+        <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
           The demo is read-only and needs no account.
         </p>
       </section>

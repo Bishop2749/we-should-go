@@ -13,27 +13,6 @@ import PoiCard from './PoiCard'
 import EventCard from './EventCard'
 import type { FilterState } from './FilterPanel'
 
-const DARK_MAP_STYLES: google.maps.MapTypeStyle[] = [
-  { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
-  { elementType: 'labels.text.stroke', stylers: [{ color: '#242f3e' }] },
-  { elementType: 'labels.text.fill', stylers: [{ color: '#746855' }] },
-  { featureType: 'administrative.locality', elementType: 'labels.text.fill', stylers: [{ color: '#d59563' }] },
-  { featureType: 'poi', elementType: 'labels.text.fill', stylers: [{ color: '#d59563' }] },
-  { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#263c3f' }] },
-  { featureType: 'poi.park', elementType: 'labels.text.fill', stylers: [{ color: '#6b9a76' }] },
-  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#38414e' }] },
-  { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#212a37' }] },
-  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#9ca5b3' }] },
-  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#746855' }] },
-  { featureType: 'road.highway', elementType: 'geometry.stroke', stylers: [{ color: '#1f2835' }] },
-  { featureType: 'road.highway', elementType: 'labels.text.fill', stylers: [{ color: '#f3d19c' }] },
-  { featureType: 'transit', elementType: 'geometry', stylers: [{ color: '#2f3948' }] },
-  { featureType: 'transit.station', elementType: 'labels.text.fill', stylers: [{ color: '#d59563' }] },
-  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#17263c' }] },
-  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#515c6d' }] },
-  { featureType: 'water', elementType: 'labels.text.stroke', stylers: [{ color: '#17263c' }] },
-]
-
 // Moves the map to the user's real location on mount
 const DEFAULT_CENTER = { lat: 34.0522, lng: -118.2437 } // Los Angeles
 
@@ -60,6 +39,41 @@ function GeolocationHandler() {
       () => {}
     )
   }, [map])
+  return null
+}
+
+/**
+ * Frames the map around the pins it was given.
+ *
+ * Used instead of GeolocationHandler on the public demo: the curated pins are
+ * all in LA, so panning a visitor to their own location would show them an
+ * empty map. Fitting the bounds also means the pins are framed on a phone
+ * rather than mostly off-screen.
+ */
+function FitToMarkers({ points }: { points: { lat: number; lng: number }[] }) {
+  const map = useMap()
+  const count = points.length
+  useEffect(() => {
+    if (!map || count === 0) return
+
+    // Fit to the cluster, not to every last point. The curated pins are
+    // geocoded from place names, and an ambiguous one can land in the wrong
+    // state ("Hollywood" matched Hollywood, FL once) — without this, a single
+    // bad row zooms the whole demo out to continental scale.
+    const median = (xs: number[]) => {
+      const s = [...xs].sort((a, b) => a - b)
+      return s[Math.floor(s.length / 2)]
+    }
+    const mLat = median(points.map((p) => p.lat))
+    const mLng = median(points.map((p) => p.lng))
+    const near = points.filter(
+      (p) => Math.abs(p.lat - mLat) <= 1.5 && Math.abs(p.lng - mLng) <= 1.5
+    )
+
+    const bounds = new google.maps.LatLngBounds()
+    for (const p of near.length > 0 ? near : points) bounds.extend(p)
+    map.fitBounds(bounds, 48)
+  }, [map, count]) // eslint-disable-line react-hooks/exhaustive-deps
   return null
 }
 
@@ -205,6 +219,8 @@ interface MapProps {
   onCreateEventFromPoi?: (place: { name: string; address: string; lat: number; lng: number; placeId: string; googleMapsUrl: string }) => void
   showNeonOverlay: boolean
   filters: FilterState
+  /** Frame the map to the pins instead of panning to the viewer's location. */
+  fitToMarkers?: boolean
 }
 
 function StatusBadge({ status }: { status: 'want_to_go' | 'been_here' }) {
@@ -281,6 +297,7 @@ export default function MapComponent({
   onCreateEventFromPoi,
   showNeonOverlay,
   filters,
+  fitToMarkers = false,
 }: MapProps) {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
   const [selectedPoi, setSelectedPoi] = useState<PoiClick | null>(null)
@@ -371,9 +388,21 @@ export default function MapComponent({
         disableDefaultUI={true}
         style={{ width: '100%', height: '100%' }}
         onClick={handleMapClick}
-        styles={isDark ? DARK_MAP_STYLES : undefined}
+        // A `styles` array is silently ignored whenever a mapId is set, and
+        // AdvancedMarker requires a mapId — so the tiles are themed with
+        // colorScheme instead.
+        colorScheme={isDark ? 'DARK' : 'LIGHT'}
       >
-        <GeolocationHandler />
+        {fitToMarkers ? (
+          <FitToMarkers
+            points={[
+              ...locations.map((l) => ({ lat: l.lat, lng: l.lng })),
+              ...events.map((e) => ({ lat: e.lat, lng: e.lng })),
+            ]}
+          />
+        ) : (
+          <GeolocationHandler />
+        )}
         <MapControls />
 
         {/* Location pins */}

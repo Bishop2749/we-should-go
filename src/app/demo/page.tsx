@@ -74,8 +74,11 @@ export default function DemoPage() {
     <div className="h-full flex flex-col">
       {/* Demo banner */}
       <div className="shrink-0 bg-emerald-500 text-white px-4 py-2.5 flex items-center justify-between gap-3 text-sm">
+        {/* Full sentence has room on tablet up; phones get the short form so
+            the banner stays one line and doesn't eat the map. */}
         <p className="font-medium">
-          Demo mode — a curated set of LA spots, read-only.
+          <span className="sm:hidden">Demo — read-only</span>
+          <span className="hidden sm:inline">Demo mode — a curated set of LA spots, read-only.</span>
         </p>
         <div className="flex items-center gap-3 shrink-0">
           <Link href="/" className="underline underline-offset-2 hover:text-emerald-100">
@@ -112,6 +115,7 @@ export default function DemoPage() {
               currentUserId={null}
               onDeleteLocation={() => {}}
               showNeonOverlay
+              fitToMarkers
               filters={{ neighborhoods: [], categories: [], show: 'all' }}
             />
           </APIProvider>

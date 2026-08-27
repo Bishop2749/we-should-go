@@ -17,17 +17,18 @@ export default async function InvitePage({ params }: PageProps) {
   const { token } = await params
   const supabase = await createClient()
 
-  const { data: invite, error } = await supabase
-    .from('invites')
-    .select('token, created_by_name, created_by_avatar, used_by, expires_at')
-    .eq('token', token)
-    .single()
+  // Invites are not directly readable — get_invite() takes the token as an
+  // argument so a caller can only resolve a token they already hold.
+  // See supabase/invites-migration.sql.
+  const { data, error } = await supabase
+    .rpc('get_invite', { invite_token: token })
+    .maybeSingle()
 
-  const isExpired = invite ? new Date(invite.expires_at) < new Date() : false
-  const isUsed = invite ? invite.used_by !== null : false
-  const isInvalid = error || !invite || isExpired || isUsed
+  const inviteData = data as Invite | null
 
-  const inviteData = invite as Invite | null
+  const isExpired = inviteData ? new Date(inviteData.expires_at) < new Date() : false
+  const isUsed = inviteData ? inviteData.used_by !== null : false
+  const isInvalid = !!error || !inviteData || isExpired || isUsed
 
   return (
     <div className="min-h-full flex flex-col items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 p-4">
