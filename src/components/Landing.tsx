@@ -64,7 +64,7 @@ export default function Landing() {
         <div className="rounded-2xl overflow-hidden shadow-2xl border border-gray-200/70 dark:border-gray-800 bg-white dark:bg-gray-900">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/screenshots/map.png"
+            src="/screenshots/map.jpg"
             alt="The We Should Go map, showing category-colored pins across Los Angeles"
             className="w-full block"
           />

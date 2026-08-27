@@ -2,9 +2,20 @@
 
 A collaborative map for friend groups — save the places you keep saying you should go, then actually go.
 
-**Live:** https://we-should-go.vercel.app
+**Live:** https://we-should-go.vercel.app · **[Try the demo](https://we-should-go.vercel.app/demo)** — a curated set of real LA spots, no account needed
 
 Everyone in a group drops pins on a shared map: restaurants, bars, events, hikes, whatever. Friends react to them, mark what they want to try, check off what they've done, and turn a pin into a real plan with a date and an RSVP list. It started from the thing people say constantly and never act on — "we should go there."
+
+![The map, showing category-colored pins across Los Angeles](public/screenshots/map.jpg)
+
+<table>
+<tr>
+<td width="65%"><img src="public/screenshots/location-card.jpg" alt="A curated location card with an editorial quote and reaction counts"></td>
+<td width="35%"><img src="public/screenshots/mobile.jpg" alt="The map on a mobile viewport"></td>
+</tr>
+</table>
+
+![An event card, with RSVP gated behind sign-in for a logged-out visitor](public/screenshots/event-card.jpg)
 
 ## Features
 
@@ -47,6 +58,8 @@ Everyone in a group drops pins on a shared map: restaurants, bars, events, hikes
 ```
 src/
   app/
+    (root)          # public landing page, or redirect to /map if signed in
+    demo/           # public read-only demo — no auth
     map/            # the main experience — map, panels, modals
     event/[id]/     # event detail + RSVP
     invite/[token]/ # invite landing + accept flow
@@ -85,6 +98,7 @@ Set up the database by running the SQL in `supabase/` against a Supabase project
 4. `social-features.sql` — per-user status and pin reactions
 5. `neon-schema.sql` + `neon-seed.sql` — optional curated pin layer
 6. `mock-friends.sql` — optional test data
+7. `demo-mode.sql` + `demo-seed.sql` — optional: powers the public `/demo` route (anon read access to the curated pins plus a handful of events/reactions seeded onto the mock accounts from step 6)
 
 The Google Maps key needs Maps JavaScript, Places, and Geocoding enabled. Restrict it by HTTP referrer before deploying.
 
@@ -98,6 +112,10 @@ npm install
 cp .env.example .env.local
 npx expo start
 ```
+
+## Public demo
+
+`/demo` reuses the real `Map` component against the real database — it isn't a separate mock. What makes it safe to expose without a login is entirely in Postgres: `supabase/demo-mode.sql` grants the `anon` role narrowly-scoped `SELECT` policies — curated pins owned by one synthetic "curator" account, plus events, RSVPs, and reactions belonging to a fixed set of mock user IDs. No policy uses `using (true)`; every one names the exact rows it allows. A real user's saved pins, friendships, and events stay invisible to `anon` regardless of what else changes in the schema. `supabase/demo-seed.sql` populates that synthetic content and is idempotent.
 
 ## Notes
 
