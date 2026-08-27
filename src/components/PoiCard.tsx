@@ -17,7 +17,7 @@ interface PoiCardProps {
   lat: number
   lng: number
   onClose: () => void
-  onAdd: (place: PoiInfo) => void
+  onAdd?: (place: PoiInfo) => void
   onCreateEvent?: (place: PoiInfo) => void
   alreadySaved: boolean
 }
@@ -108,7 +108,14 @@ export default function PoiCard({ placeId, lat, lng, onClose, onAdd, onCreateEve
 
                 <div className="flex gap-2.5">
                   {/* Add to We Should Go */}
-                  {alreadySaved ? (
+                  {!onAdd ? (
+                    <a
+                      href="/login"
+                      className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                    >
+                      Sign in to save places
+                    </a>
+                  ) : alreadySaved ? (
                     <div className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
                       <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
                         <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>

@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import Landing from '@/components/Landing'
 
 export default async function RootPage() {
   const supabase = await createClient()
@@ -7,9 +8,10 @@ export default async function RootPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Signed-in users go straight to their map; everyone else gets the landing page.
   if (user) {
     redirect('/map')
-  } else {
-    redirect('/login')
   }
+
+  return <Landing />
 }

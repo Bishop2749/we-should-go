@@ -201,7 +201,7 @@ interface MapProps {
   currentUserId: string | null
   userStatuses?: Record<string, LocationStatus>
   onDeleteLocation: (id: string) => void
-  onAddFromPoi: (place: { name: string; address: string; lat: number; lng: number; placeId: string; googleMapsUrl: string }) => void
+  onAddFromPoi?: (place: { name: string; address: string; lat: number; lng: number; placeId: string; googleMapsUrl: string }) => void
   onCreateEventFromPoi?: (place: { name: string; address: string; lat: number; lng: number; placeId: string; googleMapsUrl: string }) => void
   showNeonOverlay: boolean
   filters: FilterState
@@ -413,8 +413,10 @@ export default function MapComponent({
 
       </GoogleMap>
 
-      {/* Empty state — shown when no user-saved locations */}
-      {locations.filter(l => l.added_by !== NEON_USER_ID).length === 0 && (
+      {/* Empty state — shown when a signed-in user has no saved locations of their own.
+          Never shown to signed-out visitors (e.g. /demo): every location they can see
+          is a Neon curated pin, so this condition would otherwise always be true. */}
+      {currentUserId && locations.filter(l => l.added_by !== NEON_USER_ID).length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
           <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur rounded-2xl shadow-lg px-6 py-5 text-center max-w-xs pointer-events-auto mx-4">
             <div className="text-4xl mb-3">📍</div>
@@ -453,7 +455,7 @@ export default function MapComponent({
           lat={selectedPoi.lat}
           lng={selectedPoi.lng}
           onClose={handleClose}
-          onAdd={(place) => { onAddFromPoi(place); handleClose() }}
+          onAdd={onAddFromPoi ? (place) => { onAddFromPoi(place); handleClose() } : undefined}
           onCreateEvent={onCreateEventFromPoi ? (place) => { onCreateEventFromPoi(place); handleClose() } : undefined}
           alreadySaved={locations.some(l => l.place_id === selectedPoi.placeId)}
         />
