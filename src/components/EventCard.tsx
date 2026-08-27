@@ -9,9 +9,10 @@ interface EventCardProps {
   attendeeCount?: number
   myStatus?: EventAttendee['status']
   onClose: () => void
+  signedIn?: boolean
 }
 
-export default function EventCard({ event, attendeeCount = 0, myStatus, onClose }: EventCardProps) {
+export default function EventCard({ event, attendeeCount = 0, myStatus, onClose, signedIn = true }: EventCardProps) {
   const router = useRouter()
   const mapsUrl = event.google_maps_url ?? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location_name)}`
 
@@ -97,15 +98,24 @@ export default function EventCard({ event, attendeeCount = 0, myStatus, onClose 
 
             {/* Actions */}
             <div className="flex gap-2.5">
-              <button
-                onClick={() => { onClose(); router.push(`/event/${event.id}`) }}
-                className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm transition-colors shadow-sm"
-              >
-                View event
-                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-              </button>
+              {signedIn ? (
+                <button
+                  onClick={() => { onClose(); router.push(`/event/${event.id}`) }}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm transition-colors shadow-sm"
+                >
+                  View event
+                  <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  </svg>
+                </button>
+              ) : (
+                <a
+                  href="/login"
+                  className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm transition-colors shadow-sm"
+                >
+                  Sign in to RSVP
+                </a>
+              )}
 
               <a
                 href={mapsUrl}

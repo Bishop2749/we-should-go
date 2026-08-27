@@ -445,6 +445,7 @@ export default function MapComponent({
           attendeeCount={selectedEvent.attendeeCount}
           myStatus={selectedEvent.myStatus}
           onClose={handleClose}
+          signedIn={!!currentUserId}
         />
       )}
 

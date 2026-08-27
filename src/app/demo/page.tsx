@@ -5,19 +5,28 @@ import Link from 'next/link'
 import { APIProvider } from '@vis.gl/react-google-maps'
 import { createClient } from '@/lib/supabase/client'
 import { NEON_USER_ID, type Location } from '@/types'
+import type { Event } from '@/types/events'
 import Map from '@/components/Map'
+
+interface EventWithMeta extends Event {
+  attendeeCount?: number
+}
 
 /**
  * Read-only public demo.
  *
- * Shows only the curated "Neon" pins, which is all the anon role is allowed to
- * read (see supabase/demo-mode.sql). No auth, no writes: onAddFromPoi is
- * omitted so PoiCard shows a sign-in prompt instead of a dead button, and
- * onDeleteLocation is an unreachable no-op since currentUserId={null} means
- * LocationCard never renders the delete button in the first place.
+ * Shows the curated "Neon" pins plus the handful of events/RSVPs/reactions
+ * seeded onto the mock friend accounts (see supabase/demo-seed.sql) — all of
+ * which anon is allowed to read (see supabase/demo-mode.sql). No auth, no
+ * writes: onAddFromPoi is omitted so PoiCard shows a sign-in prompt instead
+ * of a dead button, onDeleteLocation is an unreachable no-op since
+ * currentUserId={null} means LocationCard never renders the delete button,
+ * and EventCard's RSVP action becomes a sign-in link via signedIn={false}
+ * on Map.
  */
 export default function DemoPage() {
   const [locations, setLocations] = useState<Location[]>([])
+  const [events, setEvents] = useState<EventWithMeta[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -30,8 +39,33 @@ export default function DemoPage() {
         .eq('added_by', NEON_USER_ID)
         .order('created_at', { ascending: false })
 
-      if (error) setError(error.message)
-      else setLocations(data ?? [])
+      if (error) {
+        setError(error.message)
+        setLoading(false)
+        return
+      }
+      setLocations(data ?? [])
+
+      const { data: eventData } = await supabase
+        .from('events')
+        .select('*')
+        .order('starts_at', { ascending: true })
+
+      if (eventData && eventData.length > 0) {
+        const evts = eventData as Event[]
+        const { data: countData } = await supabase
+          .from('event_attendees')
+          .select('event_id')
+          .in('event_id', evts.map((e) => e.id))
+          .eq('status', 'accepted')
+
+        const countMap: Record<string, number> = {}
+        for (const row of (countData ?? []) as { event_id: string }[]) {
+          countMap[row.event_id] = (countMap[row.event_id] ?? 0) + 1
+        }
+        setEvents(evts.map((e) => ({ ...e, attendeeCount: countMap[e.id] ?? 0 })))
+      }
+
       setLoading(false)
     })()
   }, [])
@@ -74,7 +108,7 @@ export default function DemoPage() {
           >
             <Map
               locations={locations}
-              events={[]}
+              events={events}
               currentUserId={null}
               onDeleteLocation={() => {}}
               showNeonOverlay

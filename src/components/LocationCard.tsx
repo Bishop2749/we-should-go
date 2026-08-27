@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { type Location, getCategoryMeta, NEON_USER_ID } from '@/types'
+import ReactionBar from './ReactionBar'
 
 interface LocationCardProps {
   location: Location
@@ -157,8 +158,8 @@ export default function LocationCard({ location, currentUserId, onClose, onDelet
               </div>
             )}
 
-            {/* Spacing for Neon cards before actions */}
-            {isNeon && <div className="mb-4" />}
+            {/* Reactions */}
+            <ReactionBar locationId={location.id} currentUserId={currentUserId} />
 
             {/* Actions */}
             <div className="flex gap-2.5">

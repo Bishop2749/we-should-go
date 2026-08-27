@@ -45,14 +45,13 @@ export default function ActivityFeed({ currentUserId, onClose }: ActivityFeedPro
       // Get friend IDs from friendships table
       const { data: friendships } = await supabase
         .from('friendships')
-        .select('user_id, friend_id')
-        .or(`user_id.eq.${currentUserId},friend_id.eq.${currentUserId}`)
-        .eq('status', 'accepted')
+        .select('user_a, user_b')
+        .or(`user_a.eq.${currentUserId},user_b.eq.${currentUserId}`)
 
       const friendIds: string[] = []
       for (const f of (friendships ?? [])) {
-        if (f.user_id === currentUserId) friendIds.push(f.friend_id)
-        else friendIds.push(f.user_id)
+        if (f.user_a === currentUserId) friendIds.push(f.user_b)
+        else friendIds.push(f.user_a)
       }
 
       if (friendIds.length === 0) {
